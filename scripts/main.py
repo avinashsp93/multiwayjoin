@@ -24,17 +24,24 @@ class Application(Frame):
             'r8': 'lineitem'
         }
         self.query_array = []
+        self.query_dict = {
+            (1,2): "SELECT * FROM ALIGNED_REGION_NATION LIMIT 0, 25",
+            (2,4): "SELECT * FROM ALIGNED_NATION_SUPPLIER LIMIT 0, 1000",
+            (2,5): "SELECT * FROM ALIGNED_NATION_CUSTOMER LIMIT 0, 1000",
+            (3,7): "SELECT * FROM ALIGNED_PART_PARTSUPP LIMIT 0, 1000",
+            (3,8): "SELECT * FROM ALIGNED_PART_LINEITEM LIMIT 0, 1000",
+            (4,7): "SELECT * FROM ALIGNED_SUPPLIER_PARTSUPP LIMIT 0, 1000",
+            (4,8): "SELECT * FROM ALIGNED_SUPPLIER_LINEITEM LIMIT 0, 1000",
+            (5,6): "SELECT * FROM ALIGNED_CUSTOMER_ORDERS LIMIT 0, 1000",
+            (6,8): "SELECT * FROM ALIGNED_ORDERS_LINEITEM LIMIT 0, 1000"
+        }
         self.matrix = []
-        self.global_index = 0
-        self.possible_chains = [
-            ['r1','r2','r5','r6','r8'],
-            ['r1','r2','r4','r8'],
-            ['r3','r8'],
-            ['r3','r7']
-        ]
         self.master_array = []
         self.results = []
         self.lineitemcolumn = 4
+        self.return_results = []
+
+
 
     def create_widgets(self, root):       
 
@@ -118,55 +125,48 @@ class Application(Frame):
 
     def region_nation(self):
         self.align('r1','r2')
-        self.query_array.append('SELECT * FROM ALIGNED_NATION LIMIT 0, 25')
         self.r1r2.config(state=DISABLED)
         self.create_matrix(1,2,25)
 
     def nation_supplier(self):  
         self.align('r2', 'r4')
-        self.query_array.append('SELECT * FROM ALIGNED_SUPPLIER LIMIT 0, 100')
         self.r2r4.config(state=DISABLED)
         self.create_matrix(2,4,10000)
 
     def nation_customer(self):
         self.align('r2', 'r5')
-        self.query_array.append('SELECT * FROM ALIGNED_CUSTOMER LIMIT 0, 100')
         self.r2r5.config(state=DISABLED)
         self.create_matrix(2,5,150000)
 
     def part_partsupp(self):
         self.align('r3', 'r7')
-        self.query_array.append('SELECT * FROM ALIGNED_PARTSUPP LIMIT 0, 100')
         self.r3r7.config(state=DISABLED)
         self.create_matrix(3,7,800000)
 
     def part_lineitem(self):
         self.align('r3', 'r8')
-        self.query_array.append('SELECT * FROM ALIGNED_LINEITEM LIMIT 0, 100')
+        self.lineitemcolumn = 5
         self.r3r8.config(state=DISABLED)
         self.create_matrix(3,8,6000000)
 
     def supplier_partsupp(self):
         self.align('r4', 'r7')
-        self.query_array.append('SELECT * FROM ALIGNED_PARTSUPP LIMIT 0, 100')
         self.r4r7.config(state=DISABLED)
         self.create_matrix(4,7,800000)
 
     def supplier_lineitem(self):
         self.align('r4','r8')
-        self.query_array.append('SELECT * FROM ALIGNED_LINEITEM LIMIT 0, 100')
+        self.lineitemcolumn = 5
         self.r4r8.config(state=DISABLED)
         self.create_matrix(4,8,6000000)
 
     def customer_orders(self):
         self.align('r5', 'r6')
-        self.query_array.append('SELECT * FROM ALIGNED_ORDERS LIMIT 0, 100')
         self.r5r6.config(state=DISABLED)
         self.create_matrix(5,6,1500000)
 
     def orders_lineitem(self):
         self.align('r6','r8')
-        self.query_array.append('SELECT * FROM ALIGNED_LINEITEM LIMIT 0, 100')
         self.lineitemcolumn = 5
         self.r6r8.config(state=DISABLED)
         self.create_matrix(6,8,6000000)
@@ -177,135 +177,12 @@ class Application(Frame):
         # number of rows the aligned table has 
         self.matrix.append([a,b,c])
 
-    def create_nodes(self):
-        # Node Dictionary, stores all the information about nodes, and its children
-        node_dict = {}
 
-        for i in self.matrix:
-            if(i[0] not in node_dict.keys()):
-                node_dict[i[0]] = [i[1]]
-            else:
-                node_dict[i[0]].append(i[1])
-        # Deciding the starting point of the node, set the start element to the lowest key in the dictionary
-        start = sorted(list(node_dict.keys()))[0]
-
-        # Recursive function, to produce node array using the dictionary we have
-        def dict_recur(node):
-            temp_array = []
-            # Iterate through all the keys of the dictionary, it's values are children, if a node as more
-            # than one child, Put them in another array and append the array, end all the arrays with None
-            while(node in list(node_dict.keys())):
-                temp_array.append(node)
-                if(len(node_dict.get(node)) == 1): # Graph goes linear so far
-                    node = node_dict.get(node)[0]
-
-                elif(len(node_dict.get(node)) > 1): # Graph diverts here
-                    for i in node_dict.get(node):
-                        temp_array.append(dict_recur(i))
-                    node = None
-            temp_array.append(node)
-            temp_array.append(None)
-            return temp_array
-        node_array = dict_recur(start)
-        
-
-        arr = []
-        for n in node_array:
-            # Checking if the array has another array, which means checking for diversions
-            if(isinstance(n, list) == True):
-                temp = arr[:] # Making temp empty by assigning blank array by doing Copy by value, temp = arr copies array by reference
-                for j in n: # Iterate through the nested array
-                    if(type(j))
-                    elif(j != None):
-                        temp.append(j)
-                    else:
-                        self.master_array.append(temp) # This means that you've hit the child node, store the whole path as an array in the master array
-                        temp = [] # Empty temp to store a new tree path
-            elif(isinstance(n, int) == True):
-                arr.append(n)
-
-        print(self.master_array)
-
-        if(len(self.master_array) == 2):
-            tree1 = self.master_array[0]
-            treevalue1 = 0
-            for i in range(1, len(self.master_array[0])):
-                elem = self.master_array[0][i]
-                ind = 0
-                for j in self.matrix:
-                    if(j[1] == elem):
-                        ind = self.matrix.index(j)
-                        break
-                treevalue1 += self.matrix[ind][2]
-    
-            tree2 = self.master_array[1]
-            treevalue2 = 0
-            for i in range(1, len(self.master_array[1])):
-                elem = self.master_array[1][i]
-                ind = 0
-                for j in self.matrix:
-                    if(j[1] == elem):
-                        ind = self.matrix.index(j)
-                        break
-                treevalue2 += self.matrix[ind][2]
-            
-            print(treevalue1, treevalue2)
-        
-        self.log_diverted_results()
-
-    def align(self, first, second):
-        if(first in self.alignment.keys()):
-            self.alignment[first] = 2
-        else:
-            self.alignment[first] = 1
-
-        if(second in self.alignment.keys()):
-            self.alignment[second] = 2
-        else:
-            self.alignment[second] = 1
-
-    def generate_graph(self):
-        self.create_nodes()
-        # if(2 not in self.alignment.values()):
-        #     # self.log_values()
-        #     if(len(self.alignment.values()) == 2):
-        #         self.log_values("Linear")
-        #         print("Success: Two pointed line")
-        # else:
-        #     if(list(self.alignment.values()).count(1) == 2):
-        #         self.log_values("Linear")
-        #         print("Success: Linear graph")
-        #     elif(list(self.alignment.values()).count(1) == 3):
-        #         self.log_values("Diverted")
-        #         print("Success: Diverted graph")
-        #     elif(list(self.alignment.values()).count(1) == 4):
-        #         print("Failure: Graph is unconnected")
-        #         # self.draw_graph()
-                
-
-    def draw_graph(self):
-        w = Canvas(width=400, height=300)
-        for i in self.alignment.keys():
-            x = Label(w, text=self.relations_map[i], bg="cyan", fg="black")
-            w.create_window(100, 100, window=x)
-    
-    def log_values(self, type):
-        self.results = ["" for i in range(0, len(self.alignment.keys()) -1)]
-        for i in range(0, len(self.query_array)):
-            self.results[i] = connect_tpch(self.query_array[i], TRUE)
-            if(not self.results[i]):
-                print("Error: MySQL57 not running, please run it from the taskbar")
-                break
-            else:
-                self.results[i] = sorted(self.results[i], key=lambda x: x[0])
-        if(type == "Linear"):
-            self.log_linear_results()
-        elif(type == "Diverted"):
-            self.log_diverted_results()
-
-
-    def log_linear_results(self):
+    def store_linear_results(self):
+        self.return_results = []
         if(len(self.results) == 4):
+            # last_indices
+            li_4 = len(self.results[3][0])-1
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
                     if(tuple1[4] > tuple2[0]):
@@ -323,8 +200,10 @@ class Application(Frame):
                             elif(tuple3[4] < tuple4[0]):
                                 break    
                             elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0] and tuple3[4] == tuple4[0]):
-                                print(tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[4], tuple4[0], tuple4[self.lineitemcolumn])
+                                self.return_results.append([tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[4], tuple4[0], tuple4[li_4]])
         elif(len(self.results) == 3):
+            # last_indices
+            li_3 = len(self.results[2][0])-1
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
                     if(tuple1[4] > tuple2[0]):
@@ -337,9 +216,11 @@ class Application(Frame):
                         elif(tuple2[4] < tuple3[0]):
                             break
                         elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0]):
-                            print(tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[self.lineitemcolumn])
+                            self.return_results.append([tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[li_3]])
 
         elif(len(self.results) == 2):
+            # last_indices
+            li_2 = len(self.results[1][0])-1
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
                     if(tuple1[4] > tuple2[0]):
@@ -347,26 +228,57 @@ class Application(Frame):
                     elif(tuple1[4] < tuple2[0]):
                         break
                     else:
-                        print(tuple1[0], tuple1[4], tuple2[0], tuple2[self.lineitemcolumn])
+                        self.return_results.append([tuple1[0], tuple1[4], tuple2[0], tuple2[li_2]])
         elif(len(self.results) == 1):
+            # last_indices
+            li_1 = len(self.results[0][0])-1
             for tuple1 in self.results[0]:
-                print(tuple1[0], tuple1[self.lineitemcolumn])
+                self.return_results.append([tuple1[0], tuple1[li_1]])
         else:
             print("Couldn't see any data")
 
-    def log_diverted_results(self):
-        results_lengths = [len(self.results[i]) for i in range(0, len(self.results))]
-        if(len(results_lengths) == 3):
-            inflection_array = [int() for i in range(0, len(self.results[0]))]
-            index = 0
-            temp = 0
-            j = 0
-            for i in range(index, len(self.results[2])):
-                index+=1
-                if(temp != self.results[2][i][0]):
-                    temp = self.results[2][i][0]
-                    inflection_array[j] = index
-                    j+=1
+    def log_linear_results(self):        
+        if(len(self.results) == 4):
+            # last_indices
+            li_4 = len(self.results[3][0])-1
+            for tuple1 in self.results[0]:
+                for tuple2 in self.results[1]:
+                    if(tuple1[4] > tuple2[0]):
+                        continue
+                    elif(tuple1[4] < tuple2[0]):
+                        break
+                    for tuple3 in self.results[2]:
+                        if(tuple2[4] > tuple3[0]):
+                            continue
+                        elif(tuple2[4] < tuple3[0]):
+                            break
+                        for tuple4 in self.results[3]:
+                            if(tuple3[4] > tuple4[0]):
+                                continue
+                            elif(tuple3[4] < tuple4[0]):
+                                break    
+                            elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0] and tuple3[4] == tuple4[0]):
+                                print(tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[4], tuple4[0], tuple4[li_4])
+        elif(len(self.results) == 3):
+            # last_indices
+            li_3 = len(self.results[2][0])-1
+            for tuple1 in self.results[0]:
+                for tuple2 in self.results[1]:
+                    if(tuple1[4] > tuple2[0]):
+                        continue
+                    elif(tuple1[4] < tuple2[0]):
+                        break
+                    for tuple3 in self.results[2]:
+                        if(tuple2[4] > tuple3[0]):
+                            continue
+                        elif(tuple2[4] < tuple3[0]):
+                            break
+                        elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0]):
+                            print(tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[li_3])
+
+        elif(len(self.results) == 2):
+            # last_indices
+            li_2 = len(self.results[1][0])-1
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
                     if(tuple1[4] > tuple2[0]):
@@ -374,125 +286,279 @@ class Application(Frame):
                     elif(tuple1[4] < tuple2[0]):
                         break
                     else:
-                        for i in range(0, len(inflection_array)-1):
-                            for j in range(inflection_array[i], inflection_array[i+1]):
-                                print(tuple1[0], tuple1[4], tuple2[0], tuple2[4], i, self.results[2][j][4])
-        elif(len(results_lengths) > 3):
-            query_dict = {}
-            main_branch = []
-            sub_branch = []
-            for i in range(0, len(self.matrix)):
-                query_dict[self.matrix[i][1]] = self.query_array[i]
-            # print(query_dict)
+                        print(tuple1[0], tuple1[4], tuple2[0], tuple2[li_2])
+        elif(len(self.results) == 1):
+            # last_indices
+            li_1 = len(self.results[0][0])-1
+            for tuple1 in self.results[0]:
+                print(tuple1[0], tuple1[li_1])
+        else:
+            print("Couldn't see any data")
 
-            for key, value in query_dict.items():
-                if(key in self.master_array[0] and key in self.master_array[1]):
-                    main_branch.append(value)
-                elif(key in self.master_array[0]):
-                    main_branch.append(value)
-                elif(key in self.master_array[1]):
-                    sub_branch.append(value)
+    def log_diverted_results(self, main_result, sub_result, diverge_point): 
+        # for i in self.matrix:
+        #     if(i[1] == diverge_point):
+        #         ia_length = i[2]
+        
+        # inflection_array = [int() for i in range(0, ia_length)]
+        # index = 0
+        # temp = 0
+        # j = 0
+        # for i in range(index, len(sub_result)):
+        #     index+=1
+        #     if(temp != sub_result[i][0]):
+        #         temp = sub_result[i][0]
+        #         inflection_array[j] = index
+        #         j+=1
+        # inflection_array = np.trim_zeros(inflection_array)
+        # print(inflection_array)
+        # print(sub_result)
+        for tuple1 in main_result: # iterating through shorter branch
+            for tuple2 in sub_result: # iterating through sub branch
+                if(tuple1[1] > tuple2[0]):
+                    continue
+                elif(tuple1[1] < tuple2[0]):
+                    break
                 else:
-                    print("It shouldn't come here")
-            print(main_branch, sub_branch)
+                    print(tuple1, tuple2)
 
-            def return_linear_results(branch):
-                join_result = []
-                if(len(branch) == 4):
-                    for tuple1 in branch[0]:
-                        for tuple2 in branch[1]:
-                            if(tuple1[4] > tuple2[0]):
-                                continue
-                            elif(tuple1[4] < tuple2[0]):
-                                break
-                            for tuple3 in branch[2]:
-                                if(tuple2[4] > tuple3[0]):
-                                    continue
-                                elif(tuple2[4] < tuple3[0]):
-                                    break
-                                for tuple4 in branch[3]:
-                                    if(tuple3[4] > tuple4[0]):
-                                        continue
-                                    elif(tuple3[4] < tuple4[0]):
-                                        break    
-                                    elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0] and tuple3[4] == tuple4[0]):
-                                        join_result.append([tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[4], tuple4[0], tuple4[self.lineitemcolumn]])
-                elif(len(branch) == 3):
-                    for tuple1 in branch[0]:
-                        for tuple2 in branch[1]:
-                            if(tuple1[4] > tuple2[0]):
-                                continue
-                            elif(tuple1[4] < tuple2[0]):
-                                break
-                            for tuple3 in branch[2]:
-                                if(tuple2[4] > tuple3[0]):
-                                    continue
-                                elif(tuple2[4] < tuple3[0]):
-                                    break
-                                elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0]):
-                                    join_result.append([tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[self.lineitemcolumn]])
 
-                elif(len(branch) == 2):
-                    for tuple1 in branch[0]:
-                        for tuple2 in branch[1]:
-                            if(tuple1[4] > tuple2[0]):
-                                continue
-                            elif(tuple1[4] < tuple2[0]):
-                                break
-                            else:
-                                join_result.append([tuple1[0], tuple1[4], tuple2[0], tuple2[self.lineitemcolumn]])
-                elif(len(branch) == 1):
-                    for tuple1 in branch[0]:
-                        join_result.append([tuple1[0], tuple1[self.lineitemcolumn]])
 
-                return join_result
+    def create_nodes(self):
+        # Node Dictionary, stores all the information about nodes, and its children
+        node_dict = {}
+        divert_flag = 0
+        for i in self.matrix:
+            if(i[0] not in node_dict.keys()):
+                node_dict[i[0]] = [i[1]]
+            else:
+                node_dict[i[0]].append(i[1])
+        # Deciding the starting point of the node, set the start element to the lowest key in the dictionary
+        start = sorted(list(node_dict.keys()))[0]
+
+        # Recursive function, to produce node array using the dictionary we have
+        def dict_recur(node):
+            temp_array = []
+            # Iterate through all the keys of the dictionary, it's values are children, if a node has more
+            # than one child, Put them in another array and append the array, end all the arrays with None
+            while(node in list(node_dict.keys())):
+                temp_array.append(node)
+                if(len(node_dict.get(node)) == 1): # Graph goes linear so far
+                    node = node_dict.get(node)[0]
+                elif(len(node_dict.get(node)) > 1): # Graph diverts here
+                    for i in node_dict.get(node):
+                        temp_array.append(dict_recur(i))
+                    node = None
+            temp_array.append(node)
+            temp_array.append(None)
+            return temp_array
             
-            main_branch_result = []
-            main_branch_result = ["" for i in range(0, len(main_branch))]
-            main_joined = []
-            for i in range(0, len(main_branch)):
-                main_branch_result[i] = connect_tpch(main_branch[i], TRUE)
-                if(not main_branch[i]):
+        node_array = dict_recur(start)
+
+
+        arr = []
+        for n in node_array:
+            # Checking if the array has another array, which means checking for diversions
+            if(isinstance(n, list) == True):
+                divert_flag = 1
+                temp = arr[:] # Making temp empty by assigning blank array by doing Copy by value, temp = arr copies array by reference
+                for j in n: # Iterate through the nested array
+                    if(isinstance(j, type([]))):
+                        temp2 = temp[:] # If the nested array has another nesting in it
+                        for k in j:
+                            if(k != None):
+                                temp2.append(k)
+                            else:
+                                self.master_array.append(temp2) # Array of arrays that are trees till end node
+                                temp2 = []
+                    elif(j != None):
+                        temp.append(j)
+                    else:
+                        self.master_array.append(temp) # This means that you've hit the child node, store the whole path as an array in the master array
+                        temp = [] # Empty temp to store a new tree path
+            elif(isinstance(n, int) == True):
+                arr.append(n)
+
+        # Removing empty array from master array
+        if([] in self.master_array):
+            self.master_array.remove([])
+
+        if(not divert_flag):
+            # Linear Graph
+            self.master_array = node_array[:-1] # Copy the tree sequence to the master array
+
+            # Prepare a query array
+            for i in range(0, len(self.master_array)-1):
+                if((self.master_array[i], self.master_array[i+1]) in self.query_dict.keys()):
+                    self.query_array.append(self.query_dict[self.master_array[i], self.master_array[i+1]])
+            print(self.query_array)
+
+            self.results = ["" for i in range(0, len(self.alignment.keys()) -1)]
+            for i in range(0, len(self.query_array)):
+                self.results[i] = connect_tpch(self.query_array[i], TRUE)
+                if(not self.results[i]):
                     print("Error: MySQL57 not running, please run it from the taskbar")
                     break
                 else:
-                    main_branch_result[i] = sorted(main_branch_result[i], key=lambda x: x[0])
-                    main_joined = return_linear_results(main_branch_result)
-                    
+                    self.results[i] = sorted(self.results[i], key=lambda x: x[0])
+            self.log_linear_results()
+        else:
+            self.query_array = []
+            # Diverted Graph with 2 branches
+            if(len(self.master_array) == 2):
+                tree1 = self.master_array[0]
+                treeweight1 = 0
+                for i in range(1, len(self.master_array[0])):
+                    elem = self.master_array[0][i]
+                    ind = 0
+                    for j in self.matrix:
+                        if(j[1] == elem):
+                            ind = self.matrix.index(j)
+                            break
+                    treeweight1 += self.matrix[ind][2]
+        
+                tree2 = self.master_array[1]
+                treeweight2 = 0
+                for i in range(1, len(self.master_array[1])):
+                    elem = self.master_array[1][i]
+                    ind = 0
+                    for j in self.matrix:
+                        if(j[1] == elem):
+                            ind = self.matrix.index(j)
+                            break
+                    treeweight2 += self.matrix[ind][2]
 
-            sub_branch_result = []
-            sub_branch_result = ["" for i in range(0, len(sub_branch))]
-            sub_joined = []
-            for i in range(0, len(sub_branch)):
-                print("Heree")
-                sub_branch_result[i] = connect_tpch(sub_branch[i], TRUE)
-                if(not sub_branch[i]):
-                    print("Error: MySQL57 not running, please run it from the taskbar")
-                    break
-                else:
-                    sub_branch_result[i] = sorted(sub_branch_result[i], key=lambda x: x[0])
-                    sub_joined = return_linear_results(sub_branch_result)
+                print("Master Array Length: 2")
+                print(treeweight1, treeweight2)
+                print(self.master_array)
+                # Swap short and long if treeweight1 is greater than treeweight 2, to carry out the same logic
+                if(treeweight1 > treeweight2):
+                    temp = self.master_array[0]
+                    self.master_array[0] = self.master_array[1]
+                    self.master_array[1] = temp
 
-            inflection_array = [int() for i in range(0, len(sub_branch_result[0]))]
-            index = 0
-            temp = 0
-            j = 0
-            for i in range(index, len(sub_joined)):
-                index+=1
-                if(temp != sub_joined[i][0]):
-                    temp = sub_joined[i][0]
-                    inflection_array[j] = index
-                    j+=1
-            # print(inflection_array)
-            inflection_array = np.trim_zeros(inflection_array)
-            for tuple1 in main_joined:
-                for tuple2 in sub_joined:
-                    if(tuple1[1] > tuple2[0]):
-                        continue
-                    elif(tuple1[1] < tuple2[0]):
+                self.query_array = []
+                main_result = []
+                # Traverse linearly on the shorter branch
+                for i in range(0, len(self.master_array[0])-1):
+                    # Make results big enough to store the results of the subtree
+                    self.results = ["" for j in range(0, len(self.master_array[0]) -1)]
+                    if((self.master_array[0][i], self.master_array[0][i+1]) in self.query_dict.keys()):
+                        self.query_array.append(self.query_dict[(self.master_array[0][i], self.master_array[0][i+1])])
+                for i in range(0, len(self.query_array)):
+                    self.results[i] = connect_tpch(self.query_array[i], TRUE)
+                    if(not self.results[i]):
+                        print("Error: MySQL57 not running, please run it from the taskbar")
                         break
                     else:
-                        print(tuple1[0], tuple1[1], tuple1[3], tuple2[1], tuple2[3])
+                        self.results[i] = sorted(self.results[i], key=lambda x: x[0])
+                
+                self.store_linear_results()
+                main_result = self.return_results[:]
+
+                # Identify the intersection point for the branch and traverse linearly from that intersection point
+                # in another branch
+                sub_branch = []
+                sub_result = []
+                for j in self.master_array[1][::-1]:
+                    if(j not in self.master_array[0]):
+                        sub_branch.append(j)
+                    else:
+                        sub_branch.append(j)
+                        break
+                sub_branch = sub_branch[::-1]
+                
+                self.query_array = []
+                for i in range(0, len(sub_branch)-1):
+                    # Make results big enough to store the results of the subtree
+                    self.results = ["" for j in range(0, len(sub_branch) -1)]
+                    if((sub_branch[i], sub_branch[i+1]) in self.query_dict.keys()):
+                        self.query_array.append(self.query_dict[(sub_branch[i], sub_branch[i+1])])
+                for i in range(0, len(self.query_array)):
+                    self.results[i] = connect_tpch(self.query_array[i], TRUE)
+                    if(not self.results[i]):
+                        print("Error: MySQL57 not running, please run it from the taskbar")
+                        break
+                    else:
+                        self.results[i] = sorted(self.results[i], key=lambda x: x[0])
+                
+                self.store_linear_results()
+                sub_result = self.return_results[:]
+
+
+                self.log_diverted_results(main_result, sub_result, sub_branch[0])
+                
+
+            # Diverted Graph with more than 2 branches
+            elif(len(self.master_array) >= 3):
+                # Diverted Graph with 3 branches
+                tree1 = self.master_array[0]
+                treeweight1 = 0
+                for i in range(1, len(self.master_array[0])):
+                    elem = self.master_array[0][i]
+                    ind = 0
+                    for j in self.matrix:
+                        if(j[1] == elem):
+                            ind = self.matrix.index(j)
+                            break
+                    treeweight1 += self.matrix[ind][2]
+        
+                tree2 = self.master_array[1]
+                treeweight2 = 0
+                for i in range(1, len(self.master_array[1])):
+                    elem = self.master_array[1][i]
+                    ind = 0
+                    for j in self.matrix:
+                        if(j[1] == elem):
+                            ind = self.matrix.index(j)
+                            break
+                    treeweight2 += self.matrix[ind][2]
+
+                tree3 = self.master_array[2]
+                treeweight3 = 0
+                for i in range(1, len(self.master_array[2])):
+                    elem = self.master_array[2][i]
+                    ind = 0
+                    for j in self.matrix:
+                        if(j[1] == elem):
+                            ind = self.matrix.index(j)
+                            break
+                    treeweight3 += self.matrix[ind][2]
+
+                treeweight4 = 0
+                if(self.master_array[3]):
+                    for i in range(1, len(self.master_array[3])):
+                        elem = self.master_array[3][i]
+                        ind = 0
+                        for j in self.matrix:
+                            if(j[1] == elem):
+                                ind = self.matrix.index(j)
+                                break
+                        treeweight4 += self.matrix[ind][2]
+                print("Master Array Length: Greater than 3")
+                print(treeweight1, treeweight2, treeweight3, treeweight4)
+
+    def align(self, first, second):
+        if(first in self.alignment.keys()):
+            self.alignment[first] = 2
+        else:
+            self.alignment[first] = 1
+
+        if(second in self.alignment.keys()):
+            self.alignment[second] = 2
+        else:
+            self.alignment[second] = 1
+
+    def generate_graph(self):
+        self.create_nodes()
+                
+
+    def draw_graph(self):
+        w = Canvas(width=400, height=300)
+        for i in self.alignment.keys():
+            x = Label(w, text=self.relations_map[i], bg="cyan", fg="black")
+            w.create_window(100, 100, window=x)
+
                             
 app = Flask(__name__)
 
