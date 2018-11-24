@@ -4,11 +4,13 @@ import pandas as pd
 from dbconnect import connect_tpch
 from queryAPI import get_query
 import numpy as np
+import time
 
 class Application(Frame):
     def __init__(self):
         root = Tk()
-
+        self.start_time = ""
+        self.elapsed_time = ""
         super().__init__(root)
         self.pack()
         self.create_widgets(root)
@@ -25,15 +27,15 @@ class Application(Frame):
         }
         self.query_array = []
         self.query_dict = {
-            (1,2): "SELECT * FROM ALIGNED_REGION_NATION LIMIT 0, 25",
-            (2,4): "SELECT * FROM ALIGNED_NATION_SUPPLIER LIMIT 0, 1000",
-            (2,5): "SELECT * FROM ALIGNED_NATION_CUSTOMER LIMIT 0, 1000",
-            (3,7): "SELECT * FROM ALIGNED_PART_PARTSUPP LIMIT 0, 1000",
-            (3,8): "SELECT * FROM ALIGNED_PART_LINEITEM LIMIT 0, 1000",
-            (4,7): "SELECT * FROM ALIGNED_SUPPLIER_PARTSUPP LIMIT 0, 1000",
-            (4,8): "SELECT * FROM ALIGNED_SUPPLIER_LINEITEM LIMIT 0, 1000",
-            (5,6): "SELECT * FROM ALIGNED_CUSTOMER_ORDERS LIMIT 0, 1000",
-            (6,8): "SELECT * FROM ALIGNED_ORDERS_LINEITEM LIMIT 0, 1000"
+            (1,2): "SELECT * FROM ALIGNED_REGION_NATION",
+            (2,4): "SELECT * FROM ALIGNED_NATION_SUPPLIER LIMIT 0, 100",
+            (2,5): "SELECT * FROM ALIGNED_NATION_CUSTOMER LIMIT 0, 100",
+            (3,7): "SELECT * FROM ALIGNED_PART_PARTSUPP LIMIT 0, 100",
+            (3,8): "SELECT * FROM ALIGNED_PART_LINEITEM LIMIT 0, 100",
+            (4,7): "SELECT * FROM ALIGNED_SUPPLIER_PARTSUPP LIMIT 0, 100",
+            (4,8): "SELECT * FROM ALIGNED_SUPPLIER_LINEITEM LIMIT 0, 100",
+            (5,6): "SELECT * FROM ALIGNED_CUSTOMER_ORDERS LIMIT 0, 100",
+            (6,8): "SELECT * FROM ALIGNED_ORDERS_LINEITEM LIMIT 0, 100"
         }
         self.matrix = []
         self.master_array = []
@@ -200,7 +202,7 @@ class Application(Frame):
                             elif(tuple3[4] < tuple4[0]):
                                 break    
                             elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0] and tuple3[4] == tuple4[0]):
-                                self.return_results.append([tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[4], tuple4[0], tuple4[li_4]])
+                                self.return_results.append([tuple1[0], tuple1[4], tuple2[4], tuple3[4], tuple4[li_4]])
         elif(len(self.results) == 3):
             # last_indices
             li_3 = len(self.results[2][0])-1
@@ -216,7 +218,7 @@ class Application(Frame):
                         elif(tuple2[4] < tuple3[0]):
                             break
                         elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0]):
-                            self.return_results.append([tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[li_3]])
+                            self.return_results.append([tuple1[0], tuple1[4], tuple2[4], tuple3[li_3]])
 
         elif(len(self.results) == 2):
             # last_indices
@@ -228,7 +230,7 @@ class Application(Frame):
                     elif(tuple1[4] < tuple2[0]):
                         break
                     else:
-                        self.return_results.append([tuple1[0], tuple1[4], tuple2[0], tuple2[li_2]])
+                        self.return_results.append([tuple1[0], tuple1[4], tuple2[li_2]])
         elif(len(self.results) == 1):
             # last_indices
             li_1 = len(self.results[0][0])-1
@@ -296,6 +298,7 @@ class Application(Frame):
             print("Couldn't see any data")
 
     def log_diverted_results(self, main_result, sub_result, diverge_point): 
+        diverge_point_index = self.master_array[0].index(diverge_point)
         # for i in self.matrix:
         #     if(i[1] == diverge_point):
         #         ia_length = i[2]
@@ -315,9 +318,9 @@ class Application(Frame):
         # print(sub_result)
         for tuple1 in main_result: # iterating through shorter branch
             for tuple2 in sub_result: # iterating through sub branch
-                if(tuple1[1] > tuple2[0]):
+                if(tuple1[diverge_point_index] > tuple2[0]):
                     continue
-                elif(tuple1[1] < tuple2[0]):
+                elif(tuple1[diverge_point_index] < tuple2[0]):
                     break
                 else:
                     print(tuple1, tuple2)
@@ -354,7 +357,7 @@ class Application(Frame):
             return temp_array
             
         node_array = dict_recur(start)
-
+        print(node_array)
 
         arr = []
         for n in node_array:
@@ -383,6 +386,16 @@ class Application(Frame):
         if([] in self.master_array):
             self.master_array.remove([])
 
+        # Removing unwanted trees
+        temp_array = []
+        for i in self.master_array:
+            le = i[len(i)-1]
+            if(le not in node_dict.keys()):
+                temp_array.append(i)
+        
+        self.master_array = temp_array[:]
+        print(self.master_array)
+
         if(not divert_flag):
             # Linear Graph
             self.master_array = node_array[:-1] # Copy the tree sequence to the master array
@@ -391,7 +404,6 @@ class Application(Frame):
             for i in range(0, len(self.master_array)-1):
                 if((self.master_array[i], self.master_array[i+1]) in self.query_dict.keys()):
                     self.query_array.append(self.query_dict[self.master_array[i], self.master_array[i+1]])
-            print(self.query_array)
 
             self.results = ["" for i in range(0, len(self.alignment.keys()) -1)]
             for i in range(0, len(self.query_array)):
@@ -406,39 +418,36 @@ class Application(Frame):
             self.query_array = []
             # Diverted Graph with 2 branches
             if(len(self.master_array) == 2):
+                # Finding treeweight of tree 1
                 tree1 = self.master_array[0]
-                treeweight1 = 0
-                for i in range(1, len(self.master_array[0])):
-                    elem = self.master_array[0][i]
-                    ind = 0
-                    for j in self.matrix:
-                        if(j[1] == elem):
-                            ind = self.matrix.index(j)
-                            break
-                    treeweight1 += self.matrix[ind][2]
+                treeweights = []
+                elem = self.master_array[0][len(self.master_array[0])-1]
+                ind = 0
+                for j in self.matrix:
+                    if(j[1] == elem):
+                        ind = self.matrix.index(j)
+                        break
+                treeweights.append(self.matrix[ind][2])
         
+                # Finding treeweight of tree 2
                 tree2 = self.master_array[1]
-                treeweight2 = 0
-                for i in range(1, len(self.master_array[1])):
-                    elem = self.master_array[1][i]
-                    ind = 0
-                    for j in self.matrix:
-                        if(j[1] == elem):
-                            ind = self.matrix.index(j)
-                            break
-                    treeweight2 += self.matrix[ind][2]
+                elem = self.master_array[1][len(self.master_array[1])-1]
+                ind = 0
+                for j in self.matrix:
+                    if(j[1] == elem):
+                        ind = self.matrix.index(j)
+                        break
+                treeweights.append(self.matrix[ind][2])
 
-                print("Master Array Length: 2")
-                print(treeweight1, treeweight2)
-                print(self.master_array)
                 # Swap short and long if treeweight1 is greater than treeweight 2, to carry out the same logic
-                if(treeweight1 > treeweight2):
+                if(treeweights[0] > treeweights[1]):
                     temp = self.master_array[0]
                     self.master_array[0] = self.master_array[1]
                     self.master_array[1] = temp
 
                 self.query_array = []
                 main_result = []
+
                 # Traverse linearly on the shorter branch
                 for i in range(0, len(self.master_array[0])-1):
                     # Make results big enough to store the results of the subtree
@@ -455,7 +464,7 @@ class Application(Frame):
                 
                 self.store_linear_results()
                 main_result = self.return_results[:]
-
+                
                 # Identify the intersection point for the branch and traverse linearly from that intersection point
                 # in another branch
                 sub_branch = []
@@ -484,59 +493,50 @@ class Application(Frame):
                 
                 self.store_linear_results()
                 sub_result = self.return_results[:]
-
-
+                
                 self.log_diverted_results(main_result, sub_result, sub_branch[0])
                 
 
             # Diverted Graph with more than 2 branches
             elif(len(self.master_array) >= 3):
                 # Diverted Graph with 3 branches
+                # Finding treeweight of tree 1
                 tree1 = self.master_array[0]
                 treeweight1 = 0
-                for i in range(1, len(self.master_array[0])):
-                    elem = self.master_array[0][i]
-                    ind = 0
-                    for j in self.matrix:
-                        if(j[1] == elem):
-                            ind = self.matrix.index(j)
-                            break
-                    treeweight1 += self.matrix[ind][2]
+                elem = self.master_array[0][len(self.master_array[0])-1]
+                ind = 0
+                for j in self.matrix:
+                    if(j[1] == elem):
+                        ind = self.matrix.index(j)
+                        break
+                treeweight1 = self.matrix[ind][2]
         
+                # Finding treeweight of tree 2
                 tree2 = self.master_array[1]
                 treeweight2 = 0
-                for i in range(1, len(self.master_array[1])):
-                    elem = self.master_array[1][i]
-                    ind = 0
-                    for j in self.matrix:
-                        if(j[1] == elem):
-                            ind = self.matrix.index(j)
-                            break
-                    treeweight2 += self.matrix[ind][2]
+                elem = self.master_array[1][len(self.master_array[1])-1]
+                ind = 0
+                for j in self.matrix:
+                    if(j[1] == elem):
+                        ind = self.matrix.index(j)
+                        break
+                treeweight2 = self.matrix[ind][2]
 
-                tree3 = self.master_array[2]
-                treeweight3 = 0
-                for i in range(1, len(self.master_array[2])):
-                    elem = self.master_array[2][i]
-                    ind = 0
-                    for j in self.matrix:
-                        if(j[1] == elem):
-                            ind = self.matrix.index(j)
-                            break
-                    treeweight3 += self.matrix[ind][2]
+                # Finding treeweight of tree 3
+                tree2 = self.master_array[1]
+                treeweight3= 0
+                elem = self.master_array[2][len(self.master_array[2])-1]
+                ind = 0
+                for j in self.matrix:
+                    if(j[1] == elem):
+                        ind = self.matrix.index(j)
+                        break
+                treeweight3 = self.matrix[ind][2]
 
-                treeweight4 = 0
-                if(self.master_array[3]):
-                    for i in range(1, len(self.master_array[3])):
-                        elem = self.master_array[3][i]
-                        ind = 0
-                        for j in self.matrix:
-                            if(j[1] == elem):
-                                ind = self.matrix.index(j)
-                                break
-                        treeweight4 += self.matrix[ind][2]
                 print("Master Array Length: Greater than 3")
-                print(treeweight1, treeweight2, treeweight3, treeweight4)
+                print(treeweight1, treeweight2, treeweight3)
+        self.elapsed_time = time.time() - self.start_time
+        print("{:.4f}".format(self.elapsed_time))
 
     def align(self, first, second):
         if(first in self.alignment.keys()):
@@ -550,6 +550,7 @@ class Application(Frame):
             self.alignment[second] = 1
 
     def generate_graph(self):
+        self.start_time = time.time()
         self.create_nodes()
                 
 
