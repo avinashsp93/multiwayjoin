@@ -28,12 +28,12 @@ class Application(Frame):
         self.query_array = []
         self.query_dict = {
             (1,2): "SELECT * FROM ALIGNED_REGION_NATION",
-            (2,4): "SELECT * FROM ALIGNED_NATION_SUPPLIER LIMIT 0, 100",
+            (2,4): "SELECT * FROM ALIGNED_NATION_SUPPLIER LIMIT 0, 1000",
             (2,5): "SELECT * FROM ALIGNED_NATION_CUSTOMER LIMIT 0, 100",
             (3,7): "SELECT * FROM ALIGNED_PART_PARTSUPP LIMIT 0, 100",
             (3,8): "SELECT * FROM ALIGNED_PART_LINEITEM LIMIT 0, 100",
-            (4,7): "SELECT * FROM ALIGNED_SUPPLIER_PARTSUPP LIMIT 0, 100",
-            (4,8): "SELECT * FROM ALIGNED_SUPPLIER_LINEITEM LIMIT 0, 100",
+            (4,7): "SELECT * FROM ALIGNED_SUPPLIER_PARTSUPP LIMIT 0, 1000",
+            (4,8): "SELECT * FROM ALIGNED_SUPPLIER_LINEITEM LIMIT 0, 1000",
             (5,6): "SELECT * FROM ALIGNED_CUSTOMER_ORDERS LIMIT 0, 100",
             (6,8): "SELECT * FROM ALIGNED_ORDERS_LINEITEM LIMIT 0, 100"
         }
@@ -202,7 +202,7 @@ class Application(Frame):
                             elif(tuple3[4] < tuple4[0]):
                                 break    
                             elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0] and tuple3[4] == tuple4[0]):
-                                self.return_results.append([tuple1[0], tuple1[4], tuple2[4], tuple3[4], tuple4[li_4]])
+                                self.return_results.append([tuple1, tuple2, tuple3, tuple4]) # [tuple1[0], tuple1[4], tuple2[4], tuple3[4], tuple4[li_4]]
         elif(len(self.results) == 3):
             # last_indices
             li_3 = len(self.results[2][0])-1
@@ -218,7 +218,7 @@ class Application(Frame):
                         elif(tuple2[4] < tuple3[0]):
                             break
                         elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0]):
-                            self.return_results.append([tuple1[0], tuple1[4], tuple2[4], tuple3[li_3]])
+                            self.return_results.append([tuple1, tuple2, tuple3]) # [tuple1[0], tuple1[4], tuple2[4], tuple3[li_3]]
 
         elif(len(self.results) == 2):
             # last_indices
@@ -230,12 +230,12 @@ class Application(Frame):
                     elif(tuple1[4] < tuple2[0]):
                         break
                     else:
-                        self.return_results.append([tuple1[0], tuple1[4], tuple2[li_2]])
+                        self.return_results.append([tuple1, tuple2]) # [tuple1[0], tuple1[4], tuple2[li_2]]
         elif(len(self.results) == 1):
             # last_indices
             li_1 = len(self.results[0][0])-1
             for tuple1 in self.results[0]:
-                self.return_results.append([tuple1[0], tuple1[li_1]])
+                self.return_results.append([tuple1]) # tuple1[0], tuple1[li_1]
         else:
             print("Couldn't see any data")
 
@@ -316,11 +316,12 @@ class Application(Frame):
         # inflection_array = np.trim_zeros(inflection_array)
         # print(inflection_array)
         # print(sub_result)
+        # print(sub_result)
         for tuple1 in main_result: # iterating through shorter branch
             for tuple2 in sub_result: # iterating through sub branch
-                if(tuple1[diverge_point_index] > tuple2[0]):
+                if(tuple1[diverge_point_index][0] > tuple2[0][0]):
                     continue
-                elif(tuple1[diverge_point_index] < tuple2[0]):
+                elif(tuple1[diverge_point_index][0] < tuple2[0][0]):
                     break
                 else:
                     print(tuple1, tuple2)
