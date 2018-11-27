@@ -11,8 +11,10 @@ class Application(Frame):
         root = Tk()
         self.start_time = ""
         self.elapsed_time = ""
+        self.response_time = ""
         super().__init__(root)
         self.pack()
+        self.counter = 0
         self.create_widgets(root)
         self.alignment = {}
         self.relations_map = {
@@ -27,15 +29,15 @@ class Application(Frame):
         }
         self.query_array = []
         self.query_dict = {
-            (1,2): "SELECT * FROM ALIGNED_REGION_NATION",
-            (2,4): "SELECT * FROM ALIGNED_NATION_SUPPLIER LIMIT 0, 1000",
-            (2,5): "SELECT * FROM ALIGNED_NATION_CUSTOMER LIMIT 0, 100",
-            (3,7): "SELECT * FROM ALIGNED_PART_PARTSUPP LIMIT 0, 100",
-            (3,8): "SELECT * FROM ALIGNED_PART_LINEITEM LIMIT 0, 100",
-            (4,7): "SELECT * FROM ALIGNED_SUPPLIER_PARTSUPP LIMIT 0, 1000",
-            (4,8): "SELECT * FROM ALIGNED_SUPPLIER_LINEITEM LIMIT 0, 1000",
-            (5,6): "SELECT * FROM ALIGNED_CUSTOMER_ORDERS LIMIT 0, 100",
-            (6,8): "SELECT * FROM ALIGNED_ORDERS_LINEITEM LIMIT 0, 100"
+            (1,2): "SELECT * FROM ALIGNED_REGION_NATION LIMIT 0, 1000000",
+            (2,4): "SELECT * FROM ALIGNED_NATION_SUPPLIER LIMIT 0,1000000",
+            (2,5): "SELECT * FROM ALIGNED_NATION_CUSTOMER LIMIT 0,1000000",
+            (3,7): "SELECT * FROM ALIGNED_PART_PARTSUPP LIMIT 0,1000000",
+            (3,8): "SELECT * FROM ALIGNED_PART_LINEITEM LIMIT 0,1000000",
+            (4,7): "SELECT * FROM ALIGNED_SUPPLIER_PARTSUPP LIMIT 0,1000000",
+            (4,8): "SELECT * FROM ALIGNED_SUPPLIER_LINEITEM LIMIT 0,6000000",
+            (5,6): "SELECT * FROM ALIGNED_CUSTOMER_ORDERS LIMIT 0,1000000",
+            (6,8): "SELECT * FROM ALIGNED_ORDERS_LINEITEM LIMIT 0,1000000"
         }
         self.matrix = []
         self.master_array = []
@@ -128,49 +130,58 @@ class Application(Frame):
     def region_nation(self):
         self.align('r1','r2')
         self.r1r2.config(state=DISABLED)
+        self.r1r2.config(bg="cyan")
         self.create_matrix(1,2,25)
 
     def nation_supplier(self):  
         self.align('r2', 'r4')
         self.r2r4.config(state=DISABLED)
+        self.r2r4.config(bg="cyan")
         self.create_matrix(2,4,10000)
 
     def nation_customer(self):
         self.align('r2', 'r5')
         self.r2r5.config(state=DISABLED)
+        self.r2r5.config(bg="cyan")
         self.create_matrix(2,5,150000)
 
     def part_partsupp(self):
         self.align('r3', 'r7')
         self.r3r7.config(state=DISABLED)
+        self.r3r7.config(bg="cyan")
         self.create_matrix(3,7,800000)
 
     def part_lineitem(self):
         self.align('r3', 'r8')
         self.lineitemcolumn = 5
         self.r3r8.config(state=DISABLED)
+        self.r3r8.config(bg="cyan")
         self.create_matrix(3,8,6000000)
 
     def supplier_partsupp(self):
         self.align('r4', 'r7')
         self.r4r7.config(state=DISABLED)
+        self.r4r7.config(bg="cyan")
         self.create_matrix(4,7,800000)
 
     def supplier_lineitem(self):
         self.align('r4','r8')
         self.lineitemcolumn = 5
         self.r4r8.config(state=DISABLED)
+        self.r4r8.config(bg="cyan")
         self.create_matrix(4,8,6000000)
 
     def customer_orders(self):
         self.align('r5', 'r6')
         self.r5r6.config(state=DISABLED)
+        self.r5r6.config(bg="cyan")
         self.create_matrix(5,6,1500000)
 
     def orders_lineitem(self):
         self.align('r6','r8')
         self.lineitemcolumn = 5
         self.r6r8.config(state=DISABLED)
+        self.r6r8.config(bg="cyan")
         self.create_matrix(6,8,6000000)
 
     def create_matrix(self, a, b, c):
@@ -181,53 +192,61 @@ class Application(Frame):
 
 
     def store_linear_results(self):
+        # self.response_time = time.time() - self.start_time
+        # print("{:.4f}".format(self.response_time))
         self.return_results = []
         if(len(self.results) == 4):
             # last_indices
             li_4 = len(self.results[3][0])-1
+            li_3 = len(self.results[2][0])-1
+            li_2 = len(self.results[1][0])-1
+            li_1 = len(self.results[0][0])-1
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
-                    if(tuple1[4] > tuple2[0]):
+                    if(tuple1[li_1] > tuple2[0]):
                         continue
-                    elif(tuple1[4] < tuple2[0]):
+                    elif(tuple1[li_1] < tuple2[0]):
                         break
                     for tuple3 in self.results[2]:
-                        if(tuple2[4] > tuple3[0]):
+                        if(tuple2[li_2] > tuple3[0]):
                             continue
-                        elif(tuple2[4] < tuple3[0]):
+                        elif(tuple2[li_2] < tuple3[0]):
                             break
                         for tuple4 in self.results[3]:
-                            if(tuple3[4] > tuple4[0]):
+                            if(tuple3[li_3] > tuple4[0]):
                                 continue
-                            elif(tuple3[4] < tuple4[0]):
+                            elif(tuple3[li_3] < tuple4[0]):
                                 break    
-                            elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0] and tuple3[4] == tuple4[0]):
+                            elif(tuple1[li_1] == tuple2[0] and tuple2[li_2] == tuple3[0] and tuple3[li_3] == tuple4[0]):
                                 self.return_results.append([tuple1, tuple2, tuple3, tuple4]) # [tuple1[0], tuple1[4], tuple2[4], tuple3[4], tuple4[li_4]]
         elif(len(self.results) == 3):
             # last_indices
             li_3 = len(self.results[2][0])-1
+            li_2 = len(self.results[1][0])-1
+            li_1 = len(self.results[0][0])-1
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
-                    if(tuple1[4] > tuple2[0]):
+                    if(tuple1[li_1] > tuple2[0]):
                         continue
-                    elif(tuple1[4] < tuple2[0]):
+                    elif(tuple1[li_1] < tuple2[0]):
                         break
                     for tuple3 in self.results[2]:
-                        if(tuple2[4] > tuple3[0]):
+                        if(tuple2[li_2] > tuple3[0]):
                             continue
-                        elif(tuple2[4] < tuple3[0]):
+                        elif(tuple2[li_2] < tuple3[0]):
                             break
-                        elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0]):
+                        elif(tuple1[li_1] == tuple2[0] and tuple2[li_2] == tuple3[0]):
                             self.return_results.append([tuple1, tuple2, tuple3]) # [tuple1[0], tuple1[4], tuple2[4], tuple3[li_3]]
 
         elif(len(self.results) == 2):
             # last_indices
             li_2 = len(self.results[1][0])-1
+            li_1 = len(self.results[0][0])-1
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
-                    if(tuple1[4] > tuple2[0]):
+                    if(tuple1[li_1] > tuple2[0]):
                         continue
-                    elif(tuple1[4] < tuple2[0]):
+                    elif(tuple1[li_1] < tuple2[0]):
                         break
                     else:
                         self.return_results.append([tuple1, tuple2]) # [tuple1[0], tuple1[4], tuple2[li_2]]
@@ -239,63 +258,79 @@ class Application(Frame):
         else:
             print("Couldn't see any data")
 
-    def log_linear_results(self):        
+    def log_linear_results(self): 
+        logfile = open('.\logfile.txt', 'w')
         if(len(self.results) == 4):
-            # last_indices
+             # last_indices
             li_4 = len(self.results[3][0])-1
+            li_3 = len(self.results[2][0])-1
+            li_2 = len(self.results[1][0])-1
+            li_1 = len(self.results[0][0])-1 
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
-                    if(tuple1[4] > tuple2[0]):
+                    if(tuple1[li_1] > tuple2[0]):
                         continue
-                    elif(tuple1[4] < tuple2[0]):
+                    elif(tuple1[li_1] < tuple2[0]):
                         break
                     for tuple3 in self.results[2]:
-                        if(tuple2[4] > tuple3[0]):
+                        if(tuple2[li_2] > tuple3[0]):
                             continue
-                        elif(tuple2[4] < tuple3[0]):
+                        elif(tuple2[li_2] < tuple3[0]):
                             break
                         for tuple4 in self.results[3]:
-                            if(tuple3[4] > tuple4[0]):
+                            if(tuple3[li_3] > tuple4[0]):
                                 continue
-                            elif(tuple3[4] < tuple4[0]):
+                            elif(tuple3[li_3] < tuple4[0]):
                                 break    
-                            elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0] and tuple3[4] == tuple4[0]):
-                                print(tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[4], tuple4[0], tuple4[li_4])
+                            elif(tuple1[li_1] == tuple2[0] and tuple2[li_2] == tuple3[0] and tuple3[li_3] == tuple4[0]):
+                                # print(tuple1, tuple2, tuple3, tuple4)
+                                self.counter+=1
         elif(len(self.results) == 3):
             # last_indices
             li_3 = len(self.results[2][0])-1
+            li_2 = len(self.results[1][0])-1
+            li_1 = len(self.results[0][0])-1
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
-                    if(tuple1[4] > tuple2[0]):
+                    if(tuple1[li_1] > tuple2[0]):
                         continue
-                    elif(tuple1[4] < tuple2[0]):
+                    elif(tuple1[li_1] < tuple2[0]):
                         break
                     for tuple3 in self.results[2]:
-                        if(tuple2[4] > tuple3[0]):
+                        if(tuple2[li_2] > tuple3[0]):
                             continue
-                        elif(tuple2[4] < tuple3[0]):
+                        elif(tuple2[li_2] < tuple3[0]):
                             break
-                        elif(tuple1[4] == tuple2[0] and tuple2[4] == tuple3[0]):
-                            print(tuple1[0], tuple1[4], tuple2[0], tuple2[4], tuple3[0], tuple3[li_3])
-
+                        elif(tuple1[li_1] == tuple2[0] and tuple2[li_2] == tuple3[0]):
+                            # print(tuple1, tuple2, tuple3)
+                            self.counter+=1
         elif(len(self.results) == 2):
             # last_indices
             li_2 = len(self.results[1][0])-1
+            li_1 = len(self.results[0][0])-1
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
-                    if(tuple1[4] > tuple2[0]):
+                    if(tuple1[li_1] > tuple2[0]):
                         continue
-                    elif(tuple1[4] < tuple2[0]):
+                    elif(tuple1[li_1] < tuple2[0]):
                         break
                     else:
-                        print(tuple1[0], tuple1[4], tuple2[0], tuple2[li_2])
+                        # print(tuple1, tuple2)
+                        self.counter+=1
         elif(len(self.results) == 1):
             # last_indices
             li_1 = len(self.results[0][0])-1
             for tuple1 in self.results[0]:
-                print(tuple1[0], tuple1[li_1])
+                #logging to a file
+                logfile.write('|'.join('%s' % x for x in tuple1))
+                logfile.write('\n')
+                self.counter+=1
         else:
             print("Couldn't see any data")
+        self.process_time = time.time() - self.start_time
+        print("Process time : ", "{:.4f}".format(self.process_time))
+        print("Number of rows", self.counter)
+        logfile.close()
 
     def log_diverted_results(self, main_result, sub_result, diverge_point): 
         diverge_point_index = self.master_array[0].index(diverge_point)
@@ -324,7 +359,10 @@ class Application(Frame):
                 elif(tuple1[diverge_point_index][0] < tuple2[0][0]):
                     break
                 else:
-                    print(tuple1, tuple2)
+                    pass # print(tuple1, tuple2)
+        self.process_time = time.time() - self.start_time
+        print("Process time : ", "{:.4f}".format(self.process_time))
+        print("Number of rows", self.counter)
 
 
 
@@ -358,7 +396,7 @@ class Application(Frame):
             return temp_array
             
         node_array = dict_recur(start)
-        print(node_array)
+        # print(node_array)
 
         arr = []
         for n in node_array:
@@ -395,7 +433,7 @@ class Application(Frame):
                 temp_array.append(i)
         
         self.master_array = temp_array[:]
-        print(self.master_array)
+        # print(self.master_array)
 
         if(not divert_flag):
             # Linear Graph
@@ -497,47 +535,8 @@ class Application(Frame):
                 
                 self.log_diverted_results(main_result, sub_result, sub_branch[0])
                 
-
-            # Diverted Graph with more than 2 branches
-            elif(len(self.master_array) >= 3):
-                # Diverted Graph with 3 branches
-                # Finding treeweight of tree 1
-                tree1 = self.master_array[0]
-                treeweight1 = 0
-                elem = self.master_array[0][len(self.master_array[0])-1]
-                ind = 0
-                for j in self.matrix:
-                    if(j[1] == elem):
-                        ind = self.matrix.index(j)
-                        break
-                treeweight1 = self.matrix[ind][2]
-        
-                # Finding treeweight of tree 2
-                tree2 = self.master_array[1]
-                treeweight2 = 0
-                elem = self.master_array[1][len(self.master_array[1])-1]
-                ind = 0
-                for j in self.matrix:
-                    if(j[1] == elem):
-                        ind = self.matrix.index(j)
-                        break
-                treeweight2 = self.matrix[ind][2]
-
-                # Finding treeweight of tree 3
-                tree2 = self.master_array[1]
-                treeweight3= 0
-                elem = self.master_array[2][len(self.master_array[2])-1]
-                ind = 0
-                for j in self.matrix:
-                    if(j[1] == elem):
-                        ind = self.matrix.index(j)
-                        break
-                treeweight3 = self.matrix[ind][2]
-
-                print("Master Array Length: Greater than 3")
-                print(treeweight1, treeweight2, treeweight3)
-        self.elapsed_time = time.time() - self.start_time
-        print("{:.4f}".format(self.elapsed_time))
+        # self.elapsed_time = time.time() - self.start_time
+        # print("{:.4f}".format(self.elapsed_time))
 
     def align(self, first, second):
         if(first in self.alignment.keys()):
@@ -554,32 +553,15 @@ class Application(Frame):
         self.start_time = time.time()
         self.create_nodes()
                 
-
-    def draw_graph(self):
-        w = Canvas(width=400, height=300)
-        for i in self.alignment.keys():
-            x = Label(w, text=self.relations_map[i], bg="cyan", fg="black")
-            w.create_window(100, 100, window=x)
-
-                            
+                   
 app = Flask(__name__)
 
-# @app.route('/')
-# def hello_world():
-#     return 'Hello, World!'
 
 @app.route('/')
 def hello():
     main = Application()
     main.mainloop()
     return "Tkinter closed"
-
-# @app.route('/table')
-# def display_table():
-#     # do something to create a pandas datatable
-#     df = pd.DataFrame(data=[[1,2],[3,4]])
-#     df_html = df.to_html()  # use pandas method to auto generate html
-#     return render_template('page.html', table_html=df_html)
 
 
 
