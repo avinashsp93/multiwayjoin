@@ -1,0 +1,121 @@
+================================================================================
+LINEAR GRAPHS
+================================================================================
+
+REGION - NATION
+
+SELECT * FROM REGION R INNER JOIN NATION ON R.R_REGIONKEY = N.N_REGIONKEY;
+
+--------------------------------------------------------------------------------
+
+NATION - SUPPLIER
+
+SELECT * FROM NATION N INNER JOIN SUPPLIER S ON N.N_NATIONKEY = S.S_NATIONKEY;
+
+--------------------------------------------------------------------------------
+
+NATION - CUSTOMER
+
+SELECT * FROM NATION N INNER JOIN CUSTOMER C ON N.N_NATIONKEY = C.C_NATIONKEY;
+
+--------------------------------------------------------------------------------
+
+PART - PARTSUPP
+
+SELECT * FROM PART P INNER JOIN PARTSUPP PS ON P.P_PARTKEY = PS.PS_PARTKEY;
+
+--------------------------------------------------------------------------------
+
+PART - LINEITEM
+
+SELECT * FROM PART P INNER JOIN LINEITEM L ON P.P_PARTKEY = L.L_PARTKEY;
+
+--------------------------------------------------------------------------------
+
+SUPPLIER - PARTSUPP
+
+SELECT * FROM SUPPLIER S INNER JOIN PARTSUPP PS ON S.S_SUPPKEY = PS.PS_SUPPKEY;
+
+--------------------------------------------------------------------------------
+
+SUPPLIER - LINEITEM
+
+SELECT * FROM SUPPLIER S INNER JOIN LINEITEM L ON S.S_SUPPKEY = L.L_SUPPKEY;
+
+--------------------------------------------------------------------------------
+
+CUSTOMER - ORDERS
+
+SELECT * FROM CUSTOMER C INNER JOIN ORDERS O ON C.C_CUSTKEY = O.O_CUSTKEY;
+
+--------------------------------------------------------------------------------
+
+ORDERS - LINEITEM
+
+SELECT * FROM ORDERS O INNER JOIN LINEITEM L ON O.O_ORDERKEY = L.L_ORDERKEY;
+
+--------------------------------------------------------------------------------
+
+REGION - NATION - CUSTOMER
+
+SELECT * FROM REGION R INNER JOIN (NATION N INNER JOIN CUSTOMER C
+ON N.N_NATIONKEY = C.C_NATIONKEY) 
+ON R.R_REGIONKEY = N.N_REGIONKEY;
+
+--------------------------------------------------------------------------------
+
+REGION - NATION - SUPPLIER
+
+SELECT * FROM REGION R INNER JOIN (NATION N INNER JOIN SUPPLIER SELECT
+ON N.N_NATIONKEY = S.S_NATIONKEY)
+ON R_REGIONKEY = N.N_REGIONKEY;
+
+--------------------------------------------------------------------------------
+
+REGION - NATION - CUSTOMER - ORDERS
+
+SELECT * FROM REGION R INNER JOIN (NATION N INNER JOIN
+(CUSTOMER C INNER JOIN ORDERS O 
+ON C.C_CUSTKEY = O.O_CUSTKEY)
+ON N.N_NATIONKEY = C.C_NATIONKEY) 
+ON R.R_REGIONKEY = N.N_REGIONKEY;
+
+--------------------------------------------------------------------------------
+
+REGION - NATION - SUPPLIER - PARTSUPP
+
+SELECT * FROM REGION R INNER JOIN (NATION N INNER JOIN
+(SUPPLIER S INNER JOIN PARTSUPP PS)
+ON S.S_SUPPKEY = PS.PS_SUPPKEY)
+ON N.N_NATIONKEY = S.S_NATIONKEY)
+ON R.R_REGIONKEY = N.N_REGIONKEY;
+
+--------------------------------------------------------------------------------
+
+REGION - NATION - CUSTOMER - ORDERS - LINEITEM
+
+SELECT * FROM REGION R INNER JOIN (NATION N INNER JOIN
+(CUSTOMER C INNER JOIN ( ORDERS O INNER JOIN LINEITEM L
+ON O.O_ORDERKEY = L.L_ORDERKEY)
+ON C.C_CUSTKEY = O.O_CUSTKEY)
+ON N.N_NATIONKEY = C.C_NATIONKEY) 
+ON R.R_REGIONKEY = N.N_REGIONKEY;
+
+================================================================================
+DIVERGENT GRAPHS
+================================================================================
+
+REGION - NATION - SUPPLIER - CUSTOMER
+
+SELECT * FROM REGION R INNER JOIN NATION N ON R.R_REGIONKEY = N.N_REGIONKEY 
+INNER JOIN SUPPLIER S ON N.N_NATIONKEY = S.S_NATIONKEY 
+INNER JOIN CUSTOMER C ON N.N_NATIONKEY = C.C_NATIONKEY LIMIT 0, 1000000;
+
+--------------------------------------------------------------------------------
+
+SUPPLIER - PARTSUPP - LINEITEM
+
+SELECT * FROM SUPPLIER S INNER JOIN PARTSUPP PS ON S.S_SUPPKEY = PS.PS_SUPPKEY 
+INNER JOIN LINEITEM L ON S.S_SUPPKEY = L.L_SUPPKEY LIMIT 0, 10000;
+
+--------------------------------------------------------------------------------
