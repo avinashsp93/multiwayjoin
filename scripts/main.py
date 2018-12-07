@@ -9,6 +9,7 @@ import time
 class Application(Frame):
     def __init__(self):
         root = Tk()
+        # variables to measure time throughout the program
         self.start_time = ""
         self.elapsed_time = ""
         self.response_time = ""
@@ -30,12 +31,12 @@ class Application(Frame):
         self.query_array = []
         self.query_dict = {
             (1,2): "SELECT * FROM ALIGNED_REGION_NATION LIMIT 0, 1000000",
-            (2,4): "SELECT * FROM ALIGNED_NATION_SUPPLIER LIMIT 0,1000000",
-            (2,5): "SELECT * FROM ALIGNED_NATION_CUSTOMER LIMIT 0,1000000",
+            (2,4): "SELECT * FROM ALIGNED_NATION_SUPPLIER LIMIT 0,10000",
+            (2,5): "SELECT * FROM ALIGNED_NATION_CUSTOMER LIMIT 0,10000",
             (3,7): "SELECT * FROM ALIGNED_PART_PARTSUPP LIMIT 0,1000000",
             (3,8): "SELECT * FROM ALIGNED_PART_LINEITEM LIMIT 0,1000000",
-            (4,7): "SELECT * FROM ALIGNED_SUPPLIER_PARTSUPP LIMIT 0,1000000",
-            (4,8): "SELECT * FROM ALIGNED_SUPPLIER_LINEITEM LIMIT 0,6000000",
+            (4,7): "SELECT * FROM ALIGNED_SUPPLIER_PARTSUPP LIMIT 0,10000",
+            (4,8): "SELECT * FROM ALIGNED_SUPPLIER_LINEITEM LIMIT 0,10000",
             (5,6): "SELECT * FROM ALIGNED_CUSTOMER_ORDERS LIMIT 0,1000000",
             (6,8): "SELECT * FROM ALIGNED_ORDERS_LINEITEM LIMIT 0,1000000"
         }
@@ -53,8 +54,8 @@ class Application(Frame):
         self.quit.pack(padx=5, pady=5)
 
         self.graph = Button(self)
-        self.graph["text"] = "GENERATE GRAPH!"
-        self.graph["command"] = self.generate_graph
+        self.graph["text"] = "GENERATE RESULT!"
+        self.graph["command"] = self.generate_result
         self.graph.pack(padx=5, pady=5)
 
         self.r1r2 = Button(self)
@@ -102,31 +103,6 @@ class Application(Frame):
         self.r6r8["command"] = self.orders_lineitem
         self.r6r8.pack(padx=5, pady=5, side=LEFT, anchor="n")
         
-    def region(self):
-        return None
-
-    def nation(self):
-        return None
-
-    def part(self):
-        return None
-
-    def supplier(self):
-        return None
-
-    def customer(self):
-        return None
-
-    def orders(self):
-        return None
-
-    def partsupp(self):
-        return None
-
-    def lineitem(self):
-        return None
-
-
     def region_nation(self):
         self.align('r1','r2')
         self.r1r2.config(state=DISABLED)
@@ -315,7 +291,7 @@ class Application(Frame):
                     elif(tuple1[li_1] < tuple2[0]):
                         break
                     else:
-                        # print(tuple1, tuple2)
+                        print(tuple1, tuple2)
                         self.counter+=1
         elif(len(self.results) == 1):
             # last_indices
@@ -350,8 +326,9 @@ class Application(Frame):
         #         j+=1
         # inflection_array = np.trim_zeros(inflection_array)
         # print(inflection_array)
-        # print(sub_result)
-        # print(sub_result)
+        self.response_time = time.time() - self.start_time
+        print("Response time : ", "{:.4f}".format(self.response_time))
+
         for tuple1 in main_result: # iterating through shorter branch
             for tuple2 in sub_result: # iterating through sub branch
                 if(tuple1[diverge_point_index][0] > tuple2[0][0]):
@@ -359,7 +336,7 @@ class Application(Frame):
                 elif(tuple1[diverge_point_index][0] < tuple2[0][0]):
                     break
                 else:
-                    pass # print(tuple1, tuple2)
+                    self.counter+=1 # print(tuple1, tuple2)
         self.process_time = time.time() - self.start_time
         print("Process time : ", "{:.4f}".format(self.process_time))
         print("Number of rows", self.counter)
@@ -549,7 +526,7 @@ class Application(Frame):
         else:
             self.alignment[second] = 1
 
-    def generate_graph(self):
+    def generate_result(self):
         self.start_time = time.time()
         self.create_nodes()
                 
