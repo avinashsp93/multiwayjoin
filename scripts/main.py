@@ -241,11 +241,6 @@ class Application(Frame):
             self.depth = len(self.master_array)
             self.results = [[] for i in range(0, self.depth)] # Having array of arrays to store results of first depth pass
 
-            
-
-
-
-
 
             # Get the first aligned table always
             query = self.query_dict[self.master_array[0]]
@@ -270,6 +265,7 @@ class Application(Frame):
                     # print(query, range_array)
                     index+=1
                     self.depth-=1
+                print("---")
                 self.log_linear_results()
 
             # print(len(self.results[0]), len(self.results[1]), len(self.results[2]))
@@ -286,6 +282,37 @@ class Application(Frame):
 
 
     def log_linear_results(self): 
+        if(len(self.results) == 5):
+            for tuple1 in self.results[0]:
+                for tuple2 in self.results[1]:
+                    if(tuple1[1] > tuple2[0]):
+                        continue
+                    elif(tuple1[1] < tuple2[0]):
+                        break
+                    for tuple3 in self.results[2]:
+                        if(tuple2[1] > tuple3[0]):
+                            continue
+                        elif(tuple2[1] < tuple3[0]):
+                            break
+                        for tuple4 in self.results[3]:
+                            if(tuple3[1] > tuple4[0]):
+                                continue
+                            elif(tuple3[1] < tuple4[0]):
+                                break
+                            for tuple5 in self.results[4]:
+                                if(tuple4[1] > tuple5[0]):
+                                    continue
+                                elif(tuple4[1] < tuple5[0]):
+                                    break
+                                elif(tuple1[1] == tuple2[0] and tuple2[1] == tuple3[0] and tuple3[1] == tuple4[0] and tuple4[1] == tuple5[0]):
+                                    # print(tuple1, tuple2, tuple3, tuple4)
+                                    self.counter+=1
+                                    self.logfile.write('|'.join('%s' % x for x in tuple1))
+                                    self.logfile.write('|'.join('%s' % x for x in tuple2))
+                                    self.logfile.write('|'.join('%s' % x for x in tuple3))
+                                    self.logfile.write('|'.join('%s' % x for x in tuple4))
+                                    self.logfile.write('|'.join('%s' % x for x in tuple5))
+                                    self.logfile.write('\n')
         if(len(self.results) == 4):
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
@@ -306,11 +333,11 @@ class Application(Frame):
                             elif(tuple1[1] == tuple2[0] and tuple2[1] == tuple3[0] and tuple3[1] == tuple4[0]):
                                 # print(tuple1, tuple2, tuple3, tuple4)
                                 self.counter+=1
-                            self.logfile.write('|'.join('%s' % x for x in tuple1))
-                            self.logfile.write('|'.join('%s' % x for x in tuple2))
-                            self.logfile.write('|'.join('%s' % x for x in tuple3))
-                            self.logfile.write('|'.join('%s' % x for x in tuple4))
-                            self.logfile.write('\n')
+                                self.logfile.write('|'.join('%s' % x for x in tuple1))
+                                self.logfile.write('|'.join('%s' % x for x in tuple2))
+                                self.logfile.write('|'.join('%s' % x for x in tuple3))
+                                self.logfile.write('|'.join('%s' % x for x in tuple4))
+                                self.logfile.write('\n')
         elif(len(self.results) == 3):
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
