@@ -263,6 +263,7 @@ class Application(Frame):
                         sid_string = "R"+str(self.master_array[index-1])+"_SID"
                         query += " WHERE "+sid_string+" >= "+str(range_array[0])+ " AND "+sid_string+ " <= "+str(range_array[1])+" ORDER BY R"+str(self.master_array[index])+"_SID"
                         self.results[index] = connect_tpch(query, TRUE)
+                        print(query)
                         range_array[0] = self.results[index][0][1]
                         range_array[1] = self.results[index][len(self.results[index])-1][1]
 
