@@ -173,3 +173,13 @@ where the user can specify inputs
 **Output**
 
 ![](2018-12-11-12-09-09.png)
+
+**Print File**
+
+The first few rows
+
+![](2018-12-11-12-19-10.png)
+
+The last few rows
+
+![](2018-12-11-12-20-28.png)
