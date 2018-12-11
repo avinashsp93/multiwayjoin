@@ -165,7 +165,80 @@ class Application(Frame):
         # number of rows the aligned table has 
         self.matrix.append([a,b,c])
 
-
+    def store_linear_results(self): 
+        self.return_results = []
+        if(len(self.results) == 5):
+            for tuple1 in self.results[0]:
+                for tuple2 in self.results[1]:
+                    if(tuple1[1] > tuple2[0]):
+                        continue
+                    elif(tuple1[1] < tuple2[0]):
+                        break
+                    for tuple3 in self.results[2]:
+                        if(tuple2[1] > tuple3[0]):
+                            continue
+                        elif(tuple2[1] < tuple3[0]):
+                            break
+                        for tuple4 in self.results[3]:
+                            if(tuple3[1] > tuple4[0]):
+                                continue
+                            elif(tuple3[1] < tuple4[0]):
+                                break
+                            for tuple5 in self.results[4]:
+                                if(tuple4[1] > tuple5[0]):
+                                    continue
+                                elif(tuple4[1] < tuple5[0]):
+                                    break
+                                elif(tuple1[1] == tuple2[0] and tuple2[1] == tuple3[0] and tuple3[1] == tuple4[0] and tuple4[1] == tuple5[0]):
+                                    # print(tuple1, tuple2, tuple3, tuple4, tuple5)
+                                    self.return_results.append([tuple1, tuple2, tuple3, tuple4, tuple5])
+        elif(len(self.results) == 4):
+            for tuple1 in self.results[0]:
+                for tuple2 in self.results[1]:
+                    if(tuple1[1] > tuple2[0]):
+                        continue
+                    elif(tuple1[1] < tuple2[0]):
+                        break
+                    for tuple3 in self.results[2]:
+                        if(tuple2[1] > tuple3[0]):
+                            continue
+                        elif(tuple2[1] < tuple3[0]):
+                            break
+                        for tuple4 in self.results[3]:
+                            if(tuple3[1] > tuple4[0]):
+                                continue
+                            elif(tuple3[1] < tuple4[0]):
+                                break    
+                            elif(tuple1[1] == tuple2[0] and tuple2[1] == tuple3[0] and tuple3[1] == tuple4[0]):
+                                # print(tuple1, tuple2, tuple3, tuple4)
+                                self.return_results.append([tuple1, tuple2, tuple3, tuple4])
+        elif(len(self.results) == 3):
+            for tuple1 in self.results[0]:
+                for tuple2 in self.results[1]:
+                    if(tuple1[1] > tuple2[0]):
+                        continue
+                    elif(tuple1[1] < tuple2[0]):
+                        break
+                    for tuple3 in self.results[2]:
+                        if(tuple2[1] > tuple3[0]):
+                            continue
+                        elif(tuple2[1] < tuple3[0]):
+                            break
+                        elif(tuple1[1] == tuple2[0] and tuple2[1] == tuple3[0]):
+                            # print(tuple1, tuple2, tuple3)
+                            self.return_results.append([tuple1, tuple2, tuple3])
+        elif(len(self.results) == 2):
+            for tuple1 in self.results[0]:
+                for tuple2 in self.results[1]:
+                    if(tuple1[1] > tuple2[0]):
+                        continue
+                    elif(tuple1[1] < tuple2[0]):
+                        break
+                    else:
+                        # print(tuple1, tuple2)
+                        self.return_results.append([tuple1, tuple2])
+        else:
+            print("Couldn't see any data")
 
     def create_nodes(self):
         # Node Dictionary, stores all the information about nodes, and its children
@@ -272,13 +345,131 @@ class Application(Frame):
             
         else:
             # Diverted Graph
-            pass
+            self.query_array = []
+            # Diverted Graph with 2 branches
+            if(len(self.master_array) == 2):
+                # Finding treeweight of tree 1
+                tree1 = self.master_array[0]
+                treeweights = []
+                elem = self.master_array[0][len(self.master_array[0])-1]
+                ind = 0
+                for j in self.matrix:
+                    if(j[1] == elem):
+                        ind = self.matrix.index(j)
+                        break
+                treeweights.append(self.matrix[ind][2])
+        
+                # Finding treeweight of tree 2
+                tree2 = self.master_array[1]
+                elem = self.master_array[1][len(self.master_array[1])-1]
+                ind = 0
+                for j in self.matrix:
+                    if(j[1] == elem):
+                        ind = self.matrix.index(j)
+                        break
+                treeweights.append(self.matrix[ind][2])
 
-        print(self.master_array)
+                # Swap short and long if treeweight1 is greater than treeweight 2, to carry out the same logic
+                if(treeweights[0] > treeweights[1]):
+                    temp = self.master_array[0]
+                    self.master_array[0] = self.master_array[1]
+                    self.master_array[1] = temp
+
+                self.query_array = []
+                main_result = []
+
+                print(self.query_array, treeweights)
+
+                # Traverse linearly on the shorter branch
+                for i in range(0, len(self.master_array[0])):
+                    # Make results big enough to store the results of the subtree
+                    self.results = [[] for j in range(0, len(self.master_array[0]))]
+                    if((self.master_array[0][i]) in self.query_dict.keys()):
+                        self.query_array.append(self.query_dict[self.master_array[0][i]])
+
+
+
+
+                query = self.query_array[0]
+                self.results[0] = connect_tpch(query, TRUE)
+                
+                range_array = [1, 1]
+
+                for i in self.results[0]:
+                    self.depth = len(self.master_array[0])
+                    index = 0
+                    range_array[0] = range_array[1] = i[1]
+                    while(self.depth != 0):
+                        query = self.query_dict[self.master_array[0][index]]
+                        if(index):
+                            sid_string = "R"+str(self.master_array[0][index-1])+"_SID"
+                            query += " WHERE "+sid_string+" >= "+str(range_array[0])+ " AND "+sid_string+ " <= "+str(range_array[1])+" ORDER BY R"+str(self.master_array[0][index])+"_SID"
+                            self.results[index] = connect_tpch(query, TRUE)
+                            print(query)
+                            range_array[0] = self.results[index][0][1]
+                            range_array[1] = self.results[index][len(self.results[index])-1][1]
+                        index+=1
+                        self.depth-=1
+                    self.store_linear_results()
+
+
+                main_result = self.return_results[:]
+                
+                print(len(main_result))
+
+                # Identify the intersection point for the branch and traverse linearly from that intersection point
+                # in another branch
+                sub_branch = []
+                sub_result = []
+                for j in self.master_array[1][::-1]:
+                    if(j not in self.master_array[0]):
+                        sub_branch.append(j)
+                    else:
+                        sub_branch.append(j)
+                        break
+                sub_branch = sub_branch[::-1]
+                
+                self.query_array = []
+                for i in range(0, len(sub_branch)):
+                    # Make results big enough to store the results of the subtree
+                    self.results = ["" for j in range(0, len(sub_branch))]
+
+                    if((sub_branch[i]) in self.query_dict.keys()):
+                        self.query_array.append(self.query_dict[sub_branch[i]])
+                
+                query = self.query_array[0]
+                self.results[0] = connect_tpch(query, TRUE)
+                range_array = [1, 1]
+
+                for i in self.results[0]:
+                    self.depth = len(sub_branch)
+                    index = 0
+                    range_array[0] = range_array[1] = i[1]
+                    while(self.depth != 0):
+                        query = self.query_dict[sub_branch[index]]
+                        if(index):
+                            sid_string = "R"+str(sub_branch[index-1])+"_SID"
+                            query += " WHERE "+sid_string+" >= "+str(range_array[0])+ " AND "+sid_string+ " <= "+str(range_array[1])+" ORDER BY R"+str(sub_branch[index])+"_SID"
+                            print(query)
+                            self.results[index] = connect_tpch(query, TRUE)
+                            range_array[0] = self.results[index][0][1]
+                            range_array[1] = self.results[index][len(self.results[index])-1][1]
+                        index+=1
+                        self.depth-=1
+                    self.store_linear_results()
+               
+                sub_result = self.return_results[:]
+                print(len(sub_result))
+                
+                # print(sub_result)
+                # self.log_diverted_results(main_result, sub_result, sub_branch[0])
+
+        # print(self.master_array)
                 
         # self.elapsed_time = time.time() - self.start_time
         # print("{:.4f}".format(self.elapsed_time))
 
+    
 
 
     def log_linear_results(self): 
@@ -313,7 +504,7 @@ class Application(Frame):
                                     self.logfile.write('|'.join('%s' % x for x in tuple4))
                                     self.logfile.write('|'.join('%s' % x for x in tuple5))
                                     self.logfile.write('\n')
-        if(len(self.results) == 4):
+        elif(len(self.results) == 4):
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
                     if(tuple1[1] > tuple2[0]):
