@@ -10,6 +10,9 @@ Multiway Join - Usage Guide
     - [Python](#python)
         - [pip](#pip)
         - [flask](#flask)
+- [Project Execution](#project-execution)
+- [Results](#results)
+    - [Tabular Result](#tabular-result)
 
 <!-- /TOC -->
 
@@ -148,6 +151,10 @@ from anywhere in the window.
 > $env:FLASK_APP="main"
 ```
 
+## Project Execution
+
+- Navigate to your project where you've cloned, using commandline
+
 - Run the below command from the commandline
 ```
 > flask run
@@ -168,7 +175,7 @@ where the user can specify inputs
 
 - The highlighted cyan color indicates the aligned relation that's going to be created
 
-- Click on **Generate Result** button and head back to terminal
+- Click on **Generate Result** button and head back to command line
 
 **Output**
 
@@ -183,3 +190,21 @@ The first few rows
 The last few rows
 
 ![](2018-12-11-12-20-28.png)
+
+## Results
+
+### Tabular Result
+
+| Relation              | Time          | File Size | Number of Rows    |
+|-----------------------|---------------|-----------|-------------------|
+| R -> N                | 0.02sec       | 5kB       | 25                |
+| R -> N -> S           | 0.5299sec     | 3235kB    | 10000             |
+| R -> N -> C           | 8.1313sec     | 51846kB   | 150000            |
+| R -> N -> C -> O      | 1991.81sec    | 698625kB  | 1500000           |
+| R -> N -> S -> PS     | 113.0356sec   | 380113kB  | 800000            |
+| R -> N -> C -> O -> L | 83487.59sec   | 2543871kB | 6000000           |
+| N -> S                | 0.5097sec     | 2302kB    | 10000             |
+| N -> C                | 7.1866sec     | 37855kB   | 150000            |
+| N -> S -> PS          | 49.8817sec    | 305503kB  | 800000            |
+| N -> C -> O           | 492.17sec     | 558689kB  | 1500000           |
+| S -> PS               | 433.3983sec   | 2350kB    | 800000            |
