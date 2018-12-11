@@ -9,6 +9,7 @@ Multiway Join - Usage Guide
     - [MySQL](#mysql)
     - [Python](#python)
         - [pip](#pip)
+        - [flask](#flask)
 
 <!-- /TOC -->
 
@@ -116,6 +117,13 @@ and add this to the environment variables list so that pip can be run from anywh
 ```
 from anywhere in the window.
 
+#### flask
+
+- Install flask, the GUI tool that's required to get inputs from the User and show aligned relations
+
+```
+> pip install flask
+```
 
 - Clone the project from the below link into your system.  
 ```
@@ -139,3 +147,29 @@ from anywhere in the window.
 ```
 > $env:FLASK_APP="main"
 ```
+
+- Run the below command from the commandline
+```
+> flask run
+```
+You should be getting below output
+
+![](2018-12-11-12-04-13.png)
+
+Click on the link http://127.0.0.1:5000/
+and open it in chrome browser
+
+- At this state if you refresh the server, you'll be getting a new tkinter window
+where the user can specify inputs
+
+**Input**
+
+![](2018-12-11-12-06-32.png)
+
+- The highlighted cyan color indicates the aligned relation that's going to be created
+
+- Click on **Generate Result** button and head back to terminal
+
+**Output**
+
+![](2018-12-11-12-09-09.png)
