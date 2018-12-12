@@ -318,7 +318,6 @@ class Application(Frame):
             # Get the first aligned table always
             query = self.query_dict[self.master_array[0]]
             self.results[0] = connect_tpch(query, TRUE)
-            
             range_array = [1, 1]
 
             for i in self.results[0]:
@@ -331,16 +330,18 @@ class Application(Frame):
                         sid_string = "R"+str(self.master_array[index-1])+"_SID"
                         query += " WHERE "+sid_string+" >= "+str(range_array[0])+ " AND "+sid_string+ " <= "+str(range_array[1])+" ORDER BY R"+str(self.master_array[index])+"_SID"
                         self.results[index] = connect_tpch(query, TRUE)
-                        print(query)
+                        # print(query)
                         range_array[0] = self.results[index][0][1]
                         range_array[1] = self.results[index][len(self.results[index])-1][1]
-
-                    # print(query, range_array)
                     index+=1
                     self.depth-=1
-                print("---")
+                if(self.results[0].index(i) == 0):
+                    self.response_time = time.time() - self.start_time
                 self.log_linear_results()
-
+            self.process_time = time.time() - self.start_time
+            print("Process time : ", "{:.4f}".format(self.process_time))
+            print("Response time: ", "{:.4f}".format(self.response_time))
+            print("Number of rows", self.counter)
             # print(len(self.results[0]), len(self.results[1]), len(self.results[2]))
             
         else:
@@ -496,14 +497,13 @@ class Application(Frame):
                                 elif(tuple4[1] < tuple5[0]):
                                     break
                                 elif(tuple1[1] == tuple2[0] and tuple2[1] == tuple3[0] and tuple3[1] == tuple4[0] and tuple4[1] == tuple5[0]):
-                                    # print(tuple1, tuple2, tuple3, tuple4)
                                     self.counter+=1
-                                    self.logfile.write('|'.join('%s' % x for x in tuple1))
-                                    self.logfile.write('|'.join('%s' % x for x in tuple2))
-                                    self.logfile.write('|'.join('%s' % x for x in tuple3))
-                                    self.logfile.write('|'.join('%s' % x for x in tuple4))
-                                    self.logfile.write('|'.join('%s' % x for x in tuple5))
-                                    self.logfile.write('\n')
+                                    # self.logfile.write('|'.join('%s' % x for x in tuple1))
+                                    # self.logfile.write('|'.join('%s' % x for x in tuple2))
+                                    # self.logfile.write('|'.join('%s' % x for x in tuple3))
+                                    # self.logfile.write('|'.join('%s' % x for x in tuple4))
+                                    # self.logfile.write('|'.join('%s' % x for x in tuple5))
+                                    # self.logfile.write('\n')
         elif(len(self.results) == 4):
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
@@ -522,13 +522,12 @@ class Application(Frame):
                             elif(tuple3[1] < tuple4[0]):
                                 break    
                             elif(tuple1[1] == tuple2[0] and tuple2[1] == tuple3[0] and tuple3[1] == tuple4[0]):
-                                # print(tuple1, tuple2, tuple3, tuple4)
                                 self.counter+=1
-                                self.logfile.write('|'.join('%s' % x for x in tuple1))
-                                self.logfile.write('|'.join('%s' % x for x in tuple2))
-                                self.logfile.write('|'.join('%s' % x for x in tuple3))
-                                self.logfile.write('|'.join('%s' % x for x in tuple4))
-                                self.logfile.write('\n')
+                                # self.logfile.write('|'.join('%s' % x for x in tuple1))
+                                # self.logfile.write('|'.join('%s' % x for x in tuple2))
+                                # self.logfile.write('|'.join('%s' % x for x in tuple3))
+                                # self.logfile.write('|'.join('%s' % x for x in tuple4))
+                                # self.logfile.write('\n')
         elif(len(self.results) == 3):
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
@@ -542,12 +541,11 @@ class Application(Frame):
                         elif(tuple2[1] < tuple3[0]):
                             break
                         elif(tuple1[1] == tuple2[0] and tuple2[1] == tuple3[0]):
-                            # print(tuple1, tuple2, tuple3)
                             self.counter+=1
-                            self.logfile.write('|'.join('%s' % x for x in tuple1))
-                            self.logfile.write('|'.join('%s' % x for x in tuple2))
-                            self.logfile.write('|'.join('%s' % x for x in tuple3))
-                            self.logfile.write('\n')
+                            # self.logfile.write('|'.join('%s' % x for x in tuple1))
+                            # self.logfile.write('|'.join('%s' % x for x in tuple2))
+                            # self.logfile.write('|'.join('%s' % x for x in tuple3))
+                            # self.logfile.write('\n')
         elif(len(self.results) == 2):
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
@@ -556,22 +554,18 @@ class Application(Frame):
                     elif(tuple1[1] < tuple2[0]):
                         break
                     else:
-                        # print(tuple1, tuple2)
                         self.counter+=1
-                        self.logfile.write('|'.join('%s' % x for x in tuple1))
-                        self.logfile.write('|'.join('%s' % x for x in tuple2))
-                        self.logfile.write('\n')
+                        # self.logfile.write('|'.join('%s' % x for x in tuple1))
+                        # self.logfile.write('|'.join('%s' % x for x in tuple2))
+                        # self.logfile.write('\n')
         elif(len(self.results) == 1):
             for tuple1 in self.results[0]:
                 #logging to a file
-                self.logfile.write('|'.join('%s' % x for x in tuple1))
-                self.logfile.write('\n')
+                # self.logfile.write('|'.join('%s' % x for x in tuple1))
+                # self.logfile.write('\n')
                 self.counter+=1
         else:
             print("Couldn't see any data")
-        self.process_time = time.time() - self.start_time
-        print("Process time : ", "{:.4f}".format(self.process_time))
-        print("Number of rows", self.counter)
         
 
 
