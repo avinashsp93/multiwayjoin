@@ -1,7 +1,24 @@
 Multiway Join - Usage Guide
 =================================================
 
-<!-- TOC -->autoauto- [System Requirements](#system-requirements)auto- [Software Requirements](#software-requirements)auto- [Project Setup](#project-setup)auto    - [MySQL](#mysql)auto    - [Python](#python)auto        - [pip](#pip)auto        - [flask](#flask)auto- [Project Execution](#project-execution)auto- [Results](#results)auto    - [Tabular Result](#tabular-result)autoauto<!-- /TOC -->
+<!-- TOC -->
+
+- [System Requirements](#system-requirements)
+- [Software Requirements](#software-requirements)
+- [Algorithm](#algorithm)
+    - [Relation Overview](#relation-overview)
+    - [Aligned Tables](#aligned-tables)
+    - [Implementation](#implementation)
+- [Project Setup](#project-setup)
+    - [MySQL](#mysql)
+    - [Python](#python)
+        - [pip](#pip)
+        - [flask](#flask)
+- [Project Execution](#project-execution)
+- [Results](#results)
+    - [Tabular Result](#tabular-result)
+
+<!-- /TOC -->
 
 ## System Requirements
  
