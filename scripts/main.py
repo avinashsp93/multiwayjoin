@@ -240,6 +240,31 @@ class Application(Frame):
         else:
             print("Couldn't see any data")
 
+    def log_diverted_results(self, main_result, sub_result, diverge_point):
+        print(diverge_point)
+        
+        self.response_time = time.time() - self.start_time
+        print("Response time : ", "{:.4f}".format(self.response_time))
+        flagset = 0
+        for tuple1 in main_result: # iterating through shorter branch
+            for tuple2 in sub_result: # iterating through sub branch
+                if(tuple1[diverge_point][1] == tuple2[0][1]):
+                    self.logfile.write('|'.join('%s' % x for x in tuple1[diverge_point]))
+                    self.logfile.write('|'.join('%s' % x for x in tuple2[diverge_point]))
+                elif(tuple1[diverge_point][1] < tuple2[0][1]):
+                    break
+                elif(tuple1[diverge_point][1] > tuple2[0][1]):
+                    continue
+            
+            
+        self.process_time = time.time() - self.start_time
+        print("Process time : ", "{:.4f}".format(self.process_time))
+        print("Number of rows", self.counter)
+        print("Main result ", len(main_result))
+        print("Sub result", len(sub_result))
+
+
+
     def create_nodes(self):
         # Node Dictionary, stores all the information about nodes, and its children
         node_dict = {}
@@ -379,8 +404,6 @@ class Application(Frame):
                 self.query_array = []
                 main_result = []
 
-                print(self.query_array, treeweights)
-
                 # Traverse linearly on the shorter branch
                 for i in range(0, len(self.master_array[0])):
                     # Make results big enough to store the results of the subtree
@@ -393,29 +416,24 @@ class Application(Frame):
 
                 query = self.query_array[0]
                 self.results[0] = connect_tpch(query, TRUE)
-                
+                print(query)
                 range_array = [1, 1]
 
-                for i in self.results[0]:
-                    self.depth = len(self.master_array[0])
-                    index = 0
-                    range_array[0] = range_array[1] = i[1]
-                    while(self.depth != 0):
-                        query = self.query_dict[self.master_array[0][index]]
-                        if(index):
-                            sid_string = "R"+str(self.master_array[0][index-1])+"_SID"
-                            query += " WHERE "+sid_string+" >= "+str(range_array[0])+ " AND "+sid_string+ " <= "+str(range_array[1])+" ORDER BY R"+str(self.master_array[0][index])+"_SID"
-                            self.results[index] = connect_tpch(query, TRUE)
-                            print(query)
-                            range_array[0] = self.results[index][0][1]
-                            range_array[1] = self.results[index][len(self.results[index])-1][1]
-                        index+=1
-                        self.depth-=1
-                    self.store_linear_results()
+                self.depth = len(self.master_array[0])
+                index = 0
+                while(self.depth != 0):
+                    query = self.query_dict[self.master_array[0][index]]
+                    if(index):
+                        sid_string = "R"+str(self.master_array[0][index-1])+"_SID"
+                        query += " ORDER BY R"+str(self.master_array[0][index])+"_SID"
+                        self.results[index] = connect_tpch(query, TRUE)
+                        print(query)
+                    index+=1
+                    self.depth-=1
+                self.store_linear_results()
 
 
                 main_result = self.return_results[:]
-                
                 print(len(main_result))
 
                 # Identify the intersection point for the branch and traverse linearly from that intersection point
@@ -440,30 +458,26 @@ class Application(Frame):
                 
                 query = self.query_array[0]
                 self.results[0] = connect_tpch(query, TRUE)
-                range_array = [1, 1]
 
-                for i in self.results[0]:
-                    self.depth = len(sub_branch)
-                    index = 0
-                    range_array[0] = range_array[1] = i[1]
-                    while(self.depth != 0):
-                        query = self.query_dict[sub_branch[index]]
-                        if(index):
-                            sid_string = "R"+str(sub_branch[index-1])+"_SID"
-                            query += " WHERE "+sid_string+" >= "+str(range_array[0])+ " AND "+sid_string+ " <= "+str(range_array[1])+" ORDER BY R"+str(sub_branch[index])+"_SID"
-                            print(query)
-                            self.results[index] = connect_tpch(query, TRUE)
-                            range_array[0] = self.results[index][0][1]
-                            range_array[1] = self.results[index][len(self.results[index])-1][1]
-                        index+=1
-                        self.depth-=1
-                    self.store_linear_results()
-               
+                self.depth = len(sub_branch)
+                index = 0
+                while(self.depth != 0):
+                    query = self.query_dict[sub_branch[index]]
+                    if(index):
+                        sid_string = "R"+str(sub_branch[index-1])+"_SID"
+                        query += " ORDER BY R"+str(sub_branch[index])+"_SID"
+                        print(query)
+                        self.results[index] = connect_tpch(query, TRUE)
+                    index+=1
+                    self.depth-=1
+                self.store_linear_results()
                 sub_result = self.return_results[:]
+
                 print(len(sub_result))
+
+                self.log_diverted_results(main_result, sub_result, self.master_array[0].index(sub_branch[0]))
                 
-                # print(sub_result)
-                # self.log_diverted_results(main_result, sub_result, sub_branch[0])
+                
 
         # print(self.master_array)
                 
@@ -542,10 +556,10 @@ class Application(Frame):
                             break
                         elif(tuple1[1] == tuple2[0] and tuple2[1] == tuple3[0]):
                             self.counter+=1
-                            # self.logfile.write('|'.join('%s' % x for x in tuple1))
-                            # self.logfile.write('|'.join('%s' % x for x in tuple2))
-                            # self.logfile.write('|'.join('%s' % x for x in tuple3))
-                            # self.logfile.write('\n')
+                            self.logfile.write('|'.join('%s' % x for x in tuple1))
+                            self.logfile.write('|'.join('%s' % x for x in tuple2))
+                            self.logfile.write('|'.join('%s' % x for x in tuple3))
+                            self.logfile.write('\n')
         elif(len(self.results) == 2):
             for tuple1 in self.results[0]:
                 for tuple2 in self.results[1]:
