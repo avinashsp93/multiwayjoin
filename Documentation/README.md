@@ -1,23 +1,10 @@
 Multiway Join - Usage Guide
 =================================================
 
-<!-- TOC -->
-
-- [System Requirements](#system-requirements)
-- [Software Requirements](#software-requirements)
-- [Project Setup](#project-setup)
-    - [MySQL](#mysql)
-    - [Python](#python)
-        - [pip](#pip)
-        - [flask](#flask)
-- [Project Execution](#project-execution)
-- [Results](#results)
-    - [Tabular Result](#tabular-result)
-
-<!-- /TOC -->
+<!-- TOC -->autoauto- [System Requirements](#system-requirements)auto- [Software Requirements](#software-requirements)auto- [Project Setup](#project-setup)auto    - [MySQL](#mysql)auto    - [Python](#python)auto        - [pip](#pip)auto        - [flask](#flask)auto- [Project Execution](#project-execution)auto- [Results](#results)auto    - [Tabular Result](#tabular-result)autoauto<!-- /TOC -->
 
 ## System Requirements
-
+ 
 The project was developed and tested on a laptop that had
 - **RAM**: 4GB
 - **HDD**: 320GB
@@ -53,6 +40,46 @@ https://www.python.org/
 
 - **Git 2.19.2.windows.1**  
 https://git-scm.com/download/win
+
+## Algorithm
+
+### Relation Overview
+
+The TPCH benchmark relation used for this is as below
+
+![](2018-12-11-20-48-02.png)
+
+### Aligned Tables
+
+There are 11 aligned tables possible in this
+- ALIGNED_REGION (R1)
+- ALIGNED_NATION (R1 -> R2)
+- ALIGNED_PART (R3)
+- ALIGNED_SUPPLIER (R2 -> R4)
+- ALIGNED_CUSTOMER (R2 -> R5)
+- ALIGNED_ORDERS (R5 -> R6)
+- ALIGNED_PARTSUPP (R4 -> R7, R3 -> R7)
+- ALIGNED_LINEITEM (R4 -> R8, R3 -> R8)
+
+### Implementation
+
+- Create aligned tables
+- Allow the user to select the relation he wants to create join on
+- Ex: if the user selects REGION -> NATION -> SUPPLIER,  
+for every single tuple of region, select all the nations and following suppliers which belong to that region (DFS)
+- Send it through the log_linear_result function that compares the self_sid of one table with the parent_sid of another table,
+- In the below example it compares r1_sid from aligned_region table with r1_sid from aligned_nation table and r2_sid from aligned_nation is compared with r2_sid in aligned_supplier, if they are equal, they'll be logged into a file
+```
+for tuple1 in aligned_region:  
+    for tuple2 in aligned_nation:
+        for tuple3 in aligned_supplier:
+            if(tuple1[1] == tuple2[0] && tuple2[1] == tuple3[0]):
+                log_to_file()
+```
+- For Divergent Graphs, such as REGION -> NATION -> (SUPPLIER, CUSTOMER), Identify the shortest branch,
+- Implement linear join for the shortest branch,
+then implement linear join for another branch and store the result
+- Output the crossproduct of both the result.
 
 ## Project Setup
 
@@ -208,3 +235,4 @@ The last few rows
 | N -> S -> PS          | 49.8817sec    | 305503kB  | 800000            |
 | N -> C -> O           | 492.17sec     | 558689kB  | 1500000           |
 | S -> PS               | 433.3983sec   | 2350kB    | 800000            |
+
