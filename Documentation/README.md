@@ -23,7 +23,8 @@ Multiway Join - Usage Guide
         - [flask](#flask)
 - [Project Execution](#project-execution)
 - [Results](#results)
-    - [Tabular Result](#tabular-result)
+    - [Tabular Result (Linear Graph)](#tabular-result-linear-graph)
+    - [Tabular Result (Divergent Graph)](#tabular-result-divergent-graph)
 
 <!-- /TOC -->
 ## Information
@@ -685,19 +686,33 @@ The last few rows
 
 ## Results
 
-### Tabular Result
+### Tabular Result (Linear Graph)
 
-| Relation              | Time          | File Size | Number of Rows    |
-|-----------------------|---------------|-----------|-------------------|
-| R -> N                | 0.02sec       | 5kB       | 25                |
-| R -> N -> S           | 0.5299sec     | 3235kB    | 10000             |
-| R -> N -> C           | 8.1313sec     | 51846kB   | 150000            |
-| R -> N -> C -> O      | 1991.81sec    | 698625kB  | 1500000           |
-| R -> N -> S -> PS     | 113.0356sec   | 380113kB  | 800000            |
-| R -> N -> C -> O -> L | 83487.59sec   | 2543871kB | 6000000           |
-| N -> S                | 0.5097sec     | 2302kB    | 10000             |
-| N -> C                | 7.1866sec     | 37855kB   | 150000            |
-| N -> S -> PS          | 49.8817sec    | 305503kB  | 800000            |
-| N -> C -> O           | 492.17sec     | 558689kB  | 1500000           |
-| S -> PS               | 433.3983sec   | 2350kB    | 800000            |
+| Relation              | Response Time | Process Time  | File Size | Number of Rows   	| MySQL Time |
+|-----------------------|---------------|---------------|-----------|-------------------|------------|
+| R -> N                | 0.01sec		| 0.02sec       | 5kB       | 25                | 0.078sec	 |
+| R -> N -> S           | 0.2928sec		| 0.5299sec     | 3235kB    | 10000             | 0.466sec 	 |
+| R -> N -> C           | 0.6227sec		| 5.1313sec     | 51846kB   | 150000            | 13.641sec	 |
+| R -> N -> C -> O      | 9.8108sec 	| 1991.81sec    | 698625kB  | 1500000           | 502.583sec |
+| R -> N -> S -> PS     | 8.2049sec		| 113.0356sec   | 380113kB  | 800000            | 70.940sec	 |
+| R -> N -> C -> O -> L | 360.4770sec	| 83487.59sec   | 2543871kB | 6000000           | 59.750sec	 |
+| N -> S                | 0.0330sec		| 0.5097sec     | 2302kB    | 10000             | 0.937sec	 |
+| N -> C                | 0.2478sec		| 7.1866sec     | 37855kB   | 150000            | 9.009sec	 |
+| N -> S -> PS          | 3.9955sec		| 49.8817sec    | 305503kB  | 800000            | 40.924sec	 |
+| N -> C -> O           | 6.8558sec		| 505.3210sec   | 558689kB  | 1500000           | 120.478sec |
+| S -> PS               | 0.6798sec		| 386.4896sec   | 285045kB  | 800000            | 7.422sec   |
 
+### Tabular Result (Divergent Graph)
+
+``
+Note: The results are tested for smaller segments since the output file used to exceed
+10GB because of cross product, rows used to exceed more than a billion
+``
+
+- For 1 million rows
+
+| Relation              | Time (Total)  | File Size		| MySQL Time |
+|-----------------------|---------------|---------------|------------|
+| R -> N -> (S, C)      | 15.2480sec 	| 151238kB  	| 10.43sec   |
+| R -> N -> (S, C, O)	| 32.4271sec	| 334027kB 		| 27.16sec	 |
+| N -> S -> (PS, L)		| 1507.0917sec  | 49870642kB	| 208.83sec  |
